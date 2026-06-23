@@ -1,0 +1,42 @@
+# --- Node / Vite frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# --- Rust / Tauri ---
+src-tauri/target/
+src-tauri/gen/
+
+# --- Bundled Python sidecar binaries (built artifacts) ---
+src-tauri/binaries/
+engine/build/
+engine/dist/
+engine/*.spec.bak
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.eggs/
+
+# --- Packaging output ---
+/release/
+*.dmg
+*.msi
+*.app/
+
+# --- Unused bundled Apple fonts (system stack is used at runtime; avoid
+#     redistributing SF Pro in an MIT repo) ---
+assets/app-fonts/
+
+# --- Editor / OS ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log

@@ -1,0 +1,11 @@
+# Normalize line endings so the macOS + Windows CI matrix sees identical files.
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.ico binary
+*.icns binary
+*.zip binary
+*.ttf binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@keyframes gPulse{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}
+@keyframes gScan{0%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
+@keyframes gSpin{to{transform:rotate(360deg)}}
+@keyframes gRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes gFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+*{box-sizing:border-box}
+body{margin:0}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+::placeholder{color:#54545c}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:6px}
+.gcv{image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</helmet>
+<div style="width:max-content;min-width:100%;min-height:100vh;box-sizing:border-box;padding:48px 48px 64px;background:#e7e5df;background-image:radial-gradient(circle at 30% 0%,#efeee9,#e2e0d9);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif;">
+
+  <div style="max-width:1180px;margin:0 auto 34px;display:flex;align-items:center;gap:18px;">
+    <img src="assets/gerdsenai-logo.png" alt="GerdsenAI" style="width:54px;height:54px;border-radius:12px;display:block;box-shadow:0 6px 20px -6px rgba(0,0,0,.45)" />
+    <div>
+      <div style="font-size:21px;font-weight:700;letter-spacing:-.01em;color:#1a1a1f;">GerdsenAI Label Studio <span style="font-weight:500;color:#86847c;">· DYMO LetraTag 200B desktop</span></div>
+      <div style="font-size:13px;color:#86847c;margin-top:3px;">Three directions for the main label editor — type in any one, the live thermal preview updates everywhere. Connect &amp; print are simulated.</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:48px;align-items:flex-start;">
+
+    <!-- ============ DIRECTION A — CONSOLE ============ -->
+    <div style="flex:none;width:780px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9a978d;margin:0 0 12px 4px;">A · Console — minimal pro</div>
+      <div style="height:860px;border-radius:14px;overflow:hidden;background:#08080a;box-shadow:0 30px 70px -30px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.5);display:flex;flex-direction:column;color:#f2f2f4;">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);background:#0c0c0f;">
+          <div style="display:flex;align-items:center;gap:11px;">
+            <img src="assets/gerdsenai-logo.png" style="width:26px;height:26px;border-radius:7px;display:block;" />
+            <span style="font-size:13px;font-weight:700;letter-spacing:.01em;">Label Studio</span>
+            <span style="font-size:11px;color:#62626a;font-weight:600;padding:2px 7px;border:1px solid rgba(255,255,255,.08);border-radius:20px;">v0.1 · MIT</span>
+          </div>
+          <button onClick="{{ toggleConn }}" style="{{ connPillStyle }}">
+            <span style="{{ connDotStyle }}"></span>{{ connText }}
+          </button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:12px 18px 0;">
+          <button onClick="{{ setText }}" style="{{ seg.modeText }}">Text</button>
+          <button onClick="{{ setBar }}" style="{{ seg.modeBar }}">Barcode</button>
+          <div style="flex:1;"></div>
+          <span style="font-size:11px;color:#56565e;font-weight:600;">30&nbsp;px print head · 200&nbsp;dpi</span>
+        </div>
+
+        <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;margin:8px 18px;border-radius:12px;background:radial-gradient(120% 120% at 50% 0%,#15151b,#0a0a0d 70%);border:1px solid rgba(255,255,255,.05);overflow:hidden;">
+          <div style="{{ glowStyle }}"></div>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;z-index:1;">
+            <div style="padding:14px;border-radius:8px;background:rgba(0,0,0,.35);box-shadow:0 10px 40px -10px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);">
+              <canvas class="gcv" ref="{{ refA }}"></canvas>
+            </div>
+            <div style="font-size:11px;color:#62626a;font-weight:600;letter-spacing:.03em;">{{ sizeNote }}</div>
+          </div>
+          <div style="position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:1;">
+            <sc-for list="{{ tapeItems }}" as="t" hint-placeholder-count="7">
+              <button onClick="{{ t.pick }}" title="{{ t.label }}" style="{{ t.dot }}"></button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,.06);background:#0c0c0f;">
+          <div style="display:flex;gap:10px;margin-bottom:11px;">
+            <input value="{{ line1 }}" onInput="{{ onL1 }}" placeholder="Line 1" style="flex:1;padding:11px 13px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:14px;font-weight:600;" />
+            <input value="{{ line2 }}" onInput="{{ onL2 }}" placeholder="Line 2" style="{{ line2InputStyle }}" />
+            <button onClick="{{ toggleTwo }}" style="{{ seg.two }}">2&nbsp;lines</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+            <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+              <button onClick="{{ fontS }}" style="{{ seg.fS }}">S</button>
+              <button onClick="{{ fontM }}" style="{{ seg.fM }}">M</button>
+              <button onClick="{{ fontL }}" style="{{ seg.fL }}">L</button>
+            </div>
+            <button onClick="{{ toggleBold }}" style="{{ seg.bold }}">B</button>
+            <button onClick="{{ toggleUnder }}" style="{{ seg.under }}">U</button>
+            <button onClick="{{ toggleInv }}" style="{{ seg.inv }}">Invert</button>
+            <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+              <button onClick="{{ alignL }}" style="{{ seg.aL }}">‹</button>
+              <button onClick="{{ alignC }}" style="{{ seg.aC }}">≡</button>
+              <button onClick="{{ alignR }}" style="{{ seg.aR }}">›</button>
+            </div>
+            <div style="flex:1;"></div>
+            <button onClick="{{ doPrint }}" style="{{ printBtnStyle }}">{{ printLabel }}</button>
+          </div>
+          <div style="height:16px;margin-top:9px;font-size:12px;font-weight:600;color:{{ resultColor }};">{{ resultText }}</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============ DIRECTION B — SOFT CARD ============ -->
+    <div style="flex:none;width:560px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9a978d;margin:0 0 12px 4px;">B · Card — friendly</div>
+      <div style="height:860px;border-radius:14px;overflow:hidden;background:radial-gradient(140% 80% at 50% -10%,#161422,#0a0a0d 60%);box-shadow:0 30px 70px -30px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;color:#f2f2f4;padding:26px 30px;overflow-y:auto;">
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:9px;margin-bottom:20px;">
+          <img src="assets/gerdsenai-logo.png" style="width:40px;height:40px;border-radius:10px;display:block;" />
+          <div style="font-size:15px;font-weight:700;">New label</div>
+          <button onClick="{{ toggleConn }}" style="{{ connPillStyle }}"><span style="{{ connDotStyle }}"></span>{{ connText }}</button>
+        </div>
+
+        <div style="width:100%;display:flex;gap:7px;margin-bottom:14px;">
+          <button onClick="{{ setText }}" style="{{ seg.modeTextWide }}">Text</button>
+          <button onClick="{{ setBar }}" style="{{ seg.modeBarWide }}">Barcode</button>
+        </div>
+
+        <div style="width:100%;display:flex;flex-direction:column;gap:9px;margin-bottom:18px;">
+          <input value="{{ line1 }}" onInput="{{ onL1 }}" placeholder="Type your label…" style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#f2f2f4;font-size:16px;font-weight:600;text-align:center;" />
+          <input value="{{ line2 }}" onInput="{{ onL2 }}" placeholder="Second line (optional)" style="{{ line2InputStyleB }}" />
+        </div>
+
+        <div style="width:100%;border-radius:16px;padding:22px 16px;background:linear-gradient(180deg,#121216,#0c0c0f);border:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);">
+          <span style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#56565e;">Live preview · {{ tapeName }} tape</span>
+          <div style="padding:12px;border-radius:7px;background:rgba(0,0,0,.3);box-shadow:0 8px 30px -8px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05);max-width:100%;overflow:hidden;">
+            <canvas class="gcv" ref="{{ refB }}"></canvas>
+          </div>
+          <span style="font-size:11px;color:#62626a;font-weight:600;">{{ sizeNote }}</span>
+        </div>
+
+        <div style="width:100%;display:flex;flex-direction:column;gap:11px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;font-weight:600;color:#9a9aa2;">Size</span>
+            <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+              <button onClick="{{ fontS }}" style="{{ seg.fS }}">S</button>
+              <button onClick="{{ fontM }}" style="{{ seg.fM }}">M</button>
+              <button onClick="{{ fontL }}" style="{{ seg.fL }}">L</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;font-weight:600;color:#9a9aa2;">Style</span>
+            <div style="display:flex;gap:6px;">
+              <button onClick="{{ toggleBold }}" style="{{ seg.bold }}">Bold</button>
+              <button onClick="{{ toggleUnder }}" style="{{ seg.under }}">Underline</button>
+              <button onClick="{{ toggleInv }}" style="{{ seg.inv }}">Invert</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <span style="font-size:12px;font-weight:600;color:#9a9aa2;padding-top:6px;">Tape</span>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;">
+              <sc-for list="{{ tapeItems }}" as="t" hint-placeholder-count="7">
+                <button onClick="{{ t.pick }}" title="{{ t.label }}" style="{{ t.pill }}"></button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="width:100%;margin-bottom:18px;">
+          <div style="font-size:12px;font-weight:600;color:#9a9aa2;margin-bottom:8px;">Templates</div>
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;">
+            <sc-for list="{{ templateItems }}" as="tp" hint-placeholder-count="8">
+              <button onClick="{{ tp.pick }}" style="flex:none;padding:9px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#cfcfd6;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">{{ tp.name }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <button onClick="{{ doPrint }}" style="{{ printBtnWideStyle }}">{{ printLabel }}</button>
+        <div style="height:18px;margin-top:10px;font-size:12px;font-weight:600;color:{{ resultColor }};text-align:center;">{{ resultText }}</div>
+
+      </div>
+    </div>
+
+    <!-- ============ DIRECTION C — STUDIO ============ -->
+    <div style="flex:none;width:1020px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9a978d;margin:0 0 12px 4px;">C · Studio — full workspace</div>
+      <div style="height:860px;border-radius:14px;overflow:hidden;background:#08080a;box-shadow:0 30px 70px -30px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.5);display:flex;color:#f2f2f4;">
+
+        <!-- sidebar -->
+        <div style="width:288px;flex:none;border-right:1px solid rgba(255,255,255,.06);background:#0b0b0e;display:flex;flex-direction:column;">
+          <div style="padding:15px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.06);">
+            <img src="assets/gerdsenai-logo.png" style="width:26px;height:26px;border-radius:7px;display:block;" />
+            <span style="font-size:13px;font-weight:700;">Label Studio</span>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:18px;">
+
+            <div style="border-radius:11px;padding:13px;background:{{ connCardBg }};border:1px solid {{ connCardBorder }};">
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
+                <span style="{{ connDotStyle }}"></span>
+                <span style="font-size:12px;font-weight:700;">{{ connTitle }}</span>
+              </div>
+              <div style="font-size:11px;color:#8a8a92;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:10px;min-height:14px;">{{ connDetail }}</div>
+              <button onClick="{{ toggleConn }}" style="{{ connBtnStyle }}">{{ connBtnLabel }}</button>
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Text</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <input value="{{ line1 }}" onInput="{{ onL1 }}" placeholder="Line 1" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:13px;font-weight:600;" />
+                <input value="{{ line2 }}" onInput="{{ onL2 }}" placeholder="Line 2" style="{{ line2InputStyleC }}" />
+                <div style="display:flex;gap:7px;">
+                  <button onClick="{{ toggleTwo }}" style="{{ seg.twoFlex }}">2 lines</button>
+                  <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+                    <button onClick="{{ alignL }}" style="{{ seg.aL }}">‹</button>
+                    <button onClick="{{ alignC }}" style="{{ seg.aC }}">≡</button>
+                    <button onClick="{{ alignR }}" style="{{ seg.aR }}">›</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Style</div>
+              <div style="display:flex;gap:6px;margin-bottom:9px;">
+                <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+                  <button onClick="{{ fontS }}" style="{{ seg.fS }}">S</button>
+                  <button onClick="{{ fontM }}" style="{{ seg.fM }}">M</button>
+                  <button onClick="{{ fontL }}" style="{{ seg.fL }}">L</button>
+                </div>
+                <button onClick="{{ toggleBold }}" style="{{ seg.bold }}">B</button>
+                <button onClick="{{ toggleUnder }}" style="{{ seg.under }}">U</button>
+                <button onClick="{{ toggleInv }}" style="{{ seg.inv }}">Inv</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;">
+                <span style="font-size:11px;color:#8a8a92;font-weight:600;white-space:nowrap;">Padding</span>
+                <input type="range" min="0" max="6" step="1" value="{{ padding }}" onInput="{{ onPad }}" style="flex:1;accent-color:{{ accentHex }};" />
+                <span style="font-size:11px;color:#cfcfd6;font-weight:700;width:14px;">{{ padding }}</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Tape colour</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <sc-for list="{{ tapeItems }}" as="t" hint-placeholder-count="7">
+                  <button onClick="{{ t.pick }}" title="{{ t.label }}" style="{{ t.swatch }}"></button>
+                </sc-for>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Extras</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px;">
+                <sc-for list="{{ iconItems }}" as="ic" hint-placeholder-count="9">
+                  <button onClick="{{ ic.pick }}" style="{{ ic.style }}">{{ ic.glyph }}</button>
+                </sc-for>
+              </div>
+              <button onClick="{{ toggleDate }}" style="{{ seg.dateFull }}">Insert today's date</button>
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Barcode (Code 128)</div>
+              <input value="{{ barcode }}" onInput="{{ onBar }}" placeholder="Barcode data" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:12px;font-weight:600;font-family:ui-monospace,Menlo,monospace;" />
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Templates</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <sc-for list="{{ templateItems }}" as="tp" hint-placeholder-count="8">
+                  <button onClick="{{ tp.pick }}" style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);color:#cfcfd6;font-size:12px;font-weight:600;cursor:pointer;text-align:left;"><span style="font-size:13px;opacity:.7;">{{ tp.emoji }}</span>{{ tp.name }}</button>
+                </sc-for>
+              </div>
+            </div>
+
+            <div>
+              <div style="{{ secLabel }}">Print defaults</div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:#9a9aa2;font-weight:600;">
+                <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">Floyd–Steinberg dither<input type="checkbox" checked="{{ dither }}" onChange="{{ onDither }}" style="accent-color:{{ accentHex }};width:15px;height:15px;" /></label>
+                <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">Strict MAC match<input type="checkbox" checked="{{ ensureMac }}" onChange="{{ onMac }}" style="accent-color:{{ accentHex }};width:15px;height:15px;" /></label>
+                <div style="display:flex;align-items:center;justify-content:space-between;">Stretch ×{{ stretch }}<input type="range" min="1" max="4" step="1" value="{{ stretch }}" onInput="{{ onStretch }}" style="width:96px;accent-color:{{ accentHex }};" /></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">Scan timeout {{ timeout }}s<input type="range" min="3" max="15" step="1" value="{{ timeout }}" onInput="{{ onTimeout }}" style="width:96px;accent-color:{{ accentHex }};" /></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- main -->
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.06);background:#0c0c0f;">
+            <div style="display:flex;gap:6px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+              <button onClick="{{ setText }}" style="{{ seg.modeText }}">Text</button>
+              <button onClick="{{ setBar }}" style="{{ seg.modeBar }}">Barcode</button>
+            </div>
+            <span style="font-size:13px;color:#8a8a92;font-weight:600;">{{ filename }}</span>
+            <div style="flex:1;"></div>
+            <span style="font-size:12px;font-weight:600;color:{{ resultColor }};">{{ resultText }}</span>
+            <button onClick="{{ doPrint }}" style="{{ printBtnStyle }}">{{ printLabel }}</button>
+          </div>
+
+          <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(130% 130% at 50% 0%,#141419,#0a0a0d 70%);overflow:hidden;">
+            <div style="{{ glowStyle }}"></div>
+            <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:18px;">
+              <div style="padding:18px;border-radius:9px;background:rgba(0,0,0,.32);box-shadow:0 14px 50px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06);max-width:640px;overflow:hidden;">
+                <canvas class="gcv" ref="{{ refC }}"></canvas>
+              </div>
+              <div style="font-size:12px;color:#62626a;font-weight:600;letter-spacing:.03em;">{{ sizeNote }} · {{ tapeName }} tape</div>
+            </div>
+          </div>
+
+          <div style="padding:11px 18px;border-top:1px solid rgba(255,255,255,.06);background:#0c0c0f;display:flex;align-items:center;gap:14px;">
+            <span style="font-size:11px;color:#8a8a92;font-weight:600;font-family:ui-monospace,Menlo,monospace;">{{ statusBar }}</span>
+            <div style="flex:1;"></div>
+            <span style="font-size:11px;color:#62626a;font-weight:600;">Recent</span>
+            <div style="display:flex;gap:6px;max-width:420px;overflow-x:auto;">
+              <sc-for list="{{ history }}" as="h" hint-placeholder-count="0">
+                <button onClick="{{ h.pick }}" style="flex:none;padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#b6b6bd;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis;">{{ h.text }}</button>
+              </sc-for>
+              <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;color:#4a4a52;font-weight:600;">— print something —</span></sc-if>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:960},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;blue&quot;,&quot;violet&quot;,&quot;green&quot;,&quot;rainbow&quot;],&quot;default&quot;:&quot;green&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;defaultTape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;white&quot;,&quot;clear&quot;,&quot;yellow&quot;,&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;,&quot;silver&quot;],&quot;default&quot;:&quot;white&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;glow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.canvases = {};
+    this.cfg = { A:{maxW:540,scale:9}, B:{maxW:430,scale:9}, C:{maxW:600,scale:10} };
+    this.tapeOrder = ['white','clear','yellow','red','green','blue','silver'];
+    this.TAPES = {
+      white:{paper:'#f4f3ec', ink:'#1a1a1a', label:'White', fg:'#f4f3ec', sw:'#f4f3ec'},
+      clear:{paper:'clear', ink:'#1c1c1c', label:'Clear', fg:'#e7ebf0', sw:'linear-gradient(135deg,#cfd4da 25%,#aeb4bc 25% 50%,#cfd4da 50% 75%,#aeb4bc 75%)'},
+      yellow:{paper:'#f5d12e', ink:'#1a1a1a', label:'Yellow', fg:'#f5d12e', sw:'#f5d12e'},
+      red:{paper:'#d8433b', ink:'#161616', label:'Red', fg:'#f3e3e2', sw:'#d8433b'},
+      green:{paper:'#54b75f', ink:'#11210f', label:'Green', fg:'#eaf6ea', sw:'#54b75f'},
+      blue:{paper:'#4f93d1', ink:'#0e1620', label:'Blue', fg:'#eaf2fb', sw:'#4f93d1'},
+      silver:{paper:'silver', ink:'#1a1a1a', label:'Silver', fg:'#f0f1f2', sw:'linear-gradient(135deg,#e2e5e7,#b3b7ba 50%,#d3d6d8)'}
+    };
+    this.ICONS = ['','★','♥','✓','→','●','⚡','☂','✿','✱'];
+    this.TEMPLATES = [
+      {name:'Name badge', emoji:'🪪', s:{line1:'HELLO', line2:'my name is', twoLines:true, font:'M', bold:true, align:'center', mode:'text', invert:false, icon:'', date:false}},
+      {name:'File folder', emoji:'🗂', s:{line1:'TAXES 2026', line2:'', twoLines:false, font:'L', bold:true, align:'center', mode:'text', invert:false, icon:'', date:false}},
+      {name:'Cable label', emoji:'🔌', s:{line1:'HDMI', line2:'living room TV', twoLines:true, font:'M', bold:true, align:'left', mode:'text', invert:false, icon:'→', date:false}},
+      {name:'Pantry jar', emoji:'🫙', s:{line1:'FLOUR', line2:'', twoLines:false, font:'L', bold:true, align:'center', mode:'text', invert:false, icon:'', date:false}},
+      {name:'Fragile', emoji:'⚠️', s:{line1:'FRAGILE', line2:'', twoLines:false, font:'L', bold:true, align:'center', mode:'text', invert:true, icon:'', date:false}},
+      {name:'Opened on', emoji:'📅', s:{line1:'OPENED', line2:'', twoLines:false, font:'M', bold:true, align:'center', mode:'text', invert:false, icon:'', date:true}},
+      {name:'Address', emoji:'✉️', s:{line1:'A. GERDSEN', line2:'1 Neural Way', twoLines:true, font:'S', bold:false, align:'left', mode:'text', invert:false, icon:'', date:false}},
+      {name:'Barcode', emoji:'▮', s:{mode:'barcode', barcode:'GERDSEN-200B'}}
+    ];
+    this.state = {
+      line1:'GERDSEN', line2:'AI · LABS', twoLines:true,
+      font:'M', bold:true, underline:false, invert:false, align:'center',
+      tape: this.TAPES[props.defaultTape]?props.defaultTape:'white',
+      mode:'text', barcode:'GERDSEN-200B', icon:'', date:false, padding:1,
+      conn:'idle', addr:'', rssi:0, battery:'good',
+      printing:false, result:null, history:[],
+      dither:true, ensureMac:false, stretch:2, timeout:5
+    };
+  }
+  componentDidMount(){ this._t=setTimeout(()=>this.redrawAll(),30); }
+  componentDidUpdate(){ this.redrawAll(); }
+  componentWillUnmount(){ clearTimeout(this._t); clearTimeout(this._ct); clearTimeout(this._pt); }
+
+  accent(){
+    const a = this.props.accent || 'blue';
+    if(a==='violet') return {hex:'#9b46e0', grad:'linear-gradient(90deg,#7b2fd6,#b85cf0)'};
+    if(a==='green') return {hex:'#2fc46a', grad:'linear-gradient(90deg,#1ba85a,#46e08a)'};
+    if(a==='rainbow') return {hex:'#1f8bff', grad:'linear-gradient(90deg,#00FF41,#FFD700,#FF8C00,#FF4500,#FF1493,#9932CC,#0080FF)'};
+    return {hex:'#1f8bff', grad:'linear-gradient(90deg,#0f6fe6,#3f9bff)'};
+  }
+  todayStr(){ const d=new Date(); return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2); }
+
+  /* ---------- bitmap ---------- */
+  buildBitmap(){
+    const s=this.state, H=30;
+    if(s.mode==='barcode') return this.barcodeBitmap(s.barcode||'', H);
+    let L = s.twoLines ? [s.line1||'', s.line2||''] : [s.line1||''];
+    if(s.icon){ L[0] = s.icon+' '+L[0]; }
+    if(s.date){ if(s.twoLines){ L[1]=(L[1]?L[1]+'  ':'')+this.todayStr(); } else { L[0]=(L[0]?L[0]+'  ':'')+this.todayStr(); } }
+    const sizeMap = s.twoLines ? {S:10,M:12,L:14} : {S:17,M:22,L:26};
+    const px = sizeMap[s.font]||20;
+    const weight = s.bold?'700':'500';
+    const font = weight+' '+px+"px 'Arial Narrow','Roboto Condensed','SF Pro Display',system-ui,sans-serif";
+    const m=document.createElement('canvas').getContext('2d');
+    m.font=font;
+    let tw=0; L.forEach(t=>{ tw=Math.max(tw, m.measureText(t||' ').width); });
+    tw=Math.ceil(tw)+6;
+    const pad=(s.padding||0)*7;
+    const W=Math.max(8, tw+pad*2);
+    const off=document.createElement('canvas'); off.width=W; off.height=H;
+    const c=off.getContext('2d');
+    c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+    c.fillStyle='#000'; c.font=font; c.textBaseline='middle'; c.textAlign=s.align;
+    const ax = s.align==='left'? pad+1 : s.align==='right'? W-pad-1 : W/2;
+    if(s.twoLines){ this.line(c,L[0],ax,H*0.29,s,px); this.line(c,L[1],ax,H*0.71,s,px); }
+    else { this.line(c,L[0],ax,H*0.5,s,px); }
+    const d=c.getImageData(0,0,W,H).data;
+    const data=new Uint8Array(W*H);
+    for(let i=0;i<W*H;i++){ const a=d[i*4+3], lum=(d[i*4]+d[i*4+1]+d[i*4+2])/3; data[i]=(a>60&&lum<140)?1:0; }
+    return {w:W,h:H,data};
+  }
+  line(c,text,x,y,s,px){
+    c.fillText(text||'',x,y);
+    if(s.underline && text){ const m=c.measureText(text).width; let lx=x; if(s.align==='center')lx=x-m/2; else if(s.align==='right')lx=x-m; c.fillRect(lx,Math.round(y+px*0.52),m,Math.max(1,Math.round(px*0.09))); }
+  }
+  barcodeBitmap(str,H){
+    str=(str||' ').toString();
+    const cols=[{w:9,ink:false},{w:1,ink:true},{w:1,ink:false},{w:1,ink:true}];
+    let toggle=true;
+    for(const ch of str){ const code=ch.charCodeAt(0); for(let k=0;k<3;k++){ const wd=((code>>k)&1)?2:1; cols.push({w:wd,ink:toggle}); toggle=!toggle; } }
+    cols.push({w:1,ink:true},{w:1,ink:false},{w:1,ink:true},{w:9,ink:false});
+    const W=cols.reduce((a,c)=>a+c.w,0);
+    const data=new Uint8Array(W*H);
+    const barH=Math.round(H*0.70);
+    let x=0; cols.forEach(co=>{ if(co.ink){ for(let xi=x;xi<x+co.w;xi++) for(let y=0;y<barH;y++) data[y*W+xi]=1; } x+=co.w; });
+    // human-readable text underneath
+    const off=document.createElement('canvas'); off.width=W; off.height=H;
+    const c=off.getContext('2d');
+    c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+    c.fillStyle='#000'; c.font="700 8px 'Arial Narrow',system-ui,sans-serif"; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(str.slice(0,42), W/2, H-5);
+    const d=c.getImageData(0,0,W,H).data;
+    for(let y=barH+1;y<H;y++) for(let xi=0;xi<W;xi++){ const i=y*W+xi; const a=d[i*4+3],lum=(d[i*4]+d[i*4+1]+d[i*4+2])/3; if(a>60&&lum<140) data[i]=1; }
+    return {w:W,h:H,data};
+  }
+
+  /* ---------- paint ---------- */
+  ref(id){ return (el)=>{ if(el) this.canvases[id]=el; }; }
+  redrawAll(){ try{ const b=this.buildBitmap(); this._lastW=b.w; ['A','B','C'].forEach(id=>this.paint(id,b)); }catch(e){ console.warn('draw',e); } }
+  paint(id,b){
+    const cv=this.canvases[id]; if(!cv) return; const cfg=this.cfg[id];
+    let sc=Math.floor(cfg.maxW/Math.max(1,b.w)); sc=Math.max(2,Math.min(cfg.scale,sc)); if(!isFinite(sc)) sc=4;
+    cv.width=b.w*sc; cv.height=b.h*sc; cv.style.width=(b.w*sc)+'px'; cv.style.height=(b.h*sc)+'px';
+    const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+    const tape=this.TAPES[this.state.tape], inv=this.state.invert;
+    if(inv){ ctx.fillStyle='#161618'; ctx.fillRect(0,0,cv.width,cv.height); }
+    else this.fillPaper(ctx,cv,tape);
+    ctx.fillStyle = inv ? tape.fg : tape.ink;
+    for(let y=0;y<b.h;y++) for(let x=0;x<b.w;x++){ if(b.data[y*b.w+x]) ctx.fillRect(x*sc,y*sc,sc,sc); }
+  }
+  fillPaper(ctx,cv,tape){
+    if(tape.paper==='clear'){ const t=7; for(let y=0;y<cv.height;y+=t) for(let x=0;x<cv.width;x+=t){ ctx.fillStyle=((Math.floor(x/t)+Math.floor(y/t))%2===0)?'#3a3a40':'#2c2c31'; ctx.fillRect(x,y,t,t); } ctx.fillStyle='rgba(222,230,238,0.16)'; ctx.fillRect(0,0,cv.width,cv.height); return; }
+    if(tape.paper==='silver'){ const g=ctx.createLinearGradient(0,0,0,cv.height); g.addColorStop(0,'#e2e5e7'); g.addColorStop(.45,'#c4c8cb'); g.addColorStop(.55,'#aeb2b6'); g.addColorStop(1,'#cdd0d3'); ctx.fillStyle=g; ctx.fillRect(0,0,cv.width,cv.height); return; }
+    ctx.fillStyle=tape.paper; ctx.fillRect(0,0,cv.width,cv.height);
+  }
+
+  /* ---------- connection + print (simulated) ---------- */
+  toggleConn(){ const c=this.state.conn; if(c==='on'){ this.setState({conn:'idle',addr:'',rssi:0}); return; } if(c==='scan') return; this.setState({conn:'scan',result:null}); clearTimeout(this._ct); this._ct=setTimeout(()=>{ this.setState({conn:'on',addr:'DY:32:AF:'+this.rnd()+':'+this.rnd()+':'+this.rnd(), rssi:-(42+Math.floor(Math.random()*18)), battery:'good'}); },1400); }
+  rnd(){ return Math.floor(16+Math.random()*239).toString(16).toUpperCase().padStart(2,'0'); }
+  doPrint(){ if(this.state.printing) return; if(this.state.conn!=='on'){ this.toggleConn(); clearTimeout(this._pt); this._pt=setTimeout(()=>this.runPrint(),1700); return; } this.runPrint(); }
+  runPrint(){
+    this.setState({printing:true,result:null});
+    clearTimeout(this._pt);
+    this._pt=setTimeout(()=>{
+      const codes=[{c:1,ok:true,t:'Printed successfully'},{c:1,ok:true,t:'Printed successfully'},{c:1,ok:true,t:'Printed successfully'},{c:3,ok:true,t:'Printed — battery low'},{c:7,ok:false,t:'No cassette detected'}];
+      const r=codes[Math.floor(Math.random()*codes.length)];
+      const label = this.state.mode==='barcode' ? ('▮ '+this.state.barcode) : (this.state.line1+(this.state.twoLines&&this.state.line2?' / '+this.state.line2:''));
+      const hist = r.ok ? [{text:label, s:JSON.parse(JSON.stringify(this.snapshot()))}, ...this.state.history].slice(0,8) : this.state.history;
+      this.setState({printing:false, result:r, history:hist});
+    },1500);
+  }
+  snapshot(){ const s=this.state; return {line1:s.line1,line2:s.line2,twoLines:s.twoLines,font:s.font,bold:s.bold,underline:s.underline,invert:s.invert,align:s.align,tape:s.tape,mode:s.mode,barcode:s.barcode,icon:s.icon,date:s.date,padding:s.padding}; }
+
+  /* ---------- render ---------- */
+  segStyle(a){
+    return a
+      ? "padding:7px 11px;border-radius:7px;border:1px solid "+this.accent().hex+";background:"+this.hexA(this.accent().hex,.18)+";color:#eaf2ff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .14s;min-width:30px;"
+      : "padding:7px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#9a9aa2;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .14s;min-width:30px;";
+  }
+  hexA(hex,a){ const n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+
+  renderVals(){
+    const s=this.state, ac=this.accent();
+    const seg={
+      fS:this.segStyle(s.font==='S'), fM:this.segStyle(s.font==='M'), fL:this.segStyle(s.font==='L'),
+      bold:this.segStyle(s.bold), under:this.segStyle(s.underline), inv:this.segStyle(s.invert),
+      aL:this.segStyle(s.align==='left'), aC:this.segStyle(s.align==='center'), aR:this.segStyle(s.align==='right'),
+      modeText:this.segStyle(s.mode==='text'), modeBar:this.segStyle(s.mode==='barcode'),
+      two:this.segStyle(s.twoLines), dateFull:this.segStyle(s.date)+';width:100%;'
+    };
+    seg.twoFlex=seg.two+';flex:1;';
+    seg.modeTextWide=this.segStyle(s.mode==='text')+';flex:1;text-align:center;padding:10px;';
+    seg.modeBarWide=this.segStyle(s.mode==='barcode')+';flex:1;text-align:center;padding:10px;';
+
+    const tapeItems=this.tapeOrder.map(id=>{
+      const tp=this.TAPES[id], on=s.tape===id;
+      const ring = on ? '0 0 0 2px '+ac.hex+',0 0 0 4px rgba(0,0,0,.5)' : '0 0 0 1px rgba(255,255,255,.18)';
+      return { id, label:tp.label, pick:()=>this.setState({tape:id}),
+        dot:'width:20px;height:20px;border-radius:50%;border:none;cursor:pointer;background:'+tp.sw+';box-shadow:'+ring+';padding:0;',
+        pill:'width:26px;height:26px;border-radius:8px;border:none;cursor:pointer;background:'+tp.sw+';box-shadow:'+ring+';padding:0;',
+        swatch:'width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;background:'+tp.sw+';box-shadow:'+ring+';padding:0;' };
+    });
+    const iconItems=this.ICONS.map(g=>({ glyph:g===''?'∅':g, pick:()=>this.setState({icon:g}),
+      style:this.segStyle(s.icon===g)+';width:34px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;padding:0;' }));
+    const templateItems=this.TEMPLATES.map(t=>({ name:t.name, emoji:t.emoji, pick:()=>this.setState(Object.assign({result:null},t.s)) }));
+    const history=s.history.map(h=>({ text:h.text, pick:()=>this.setState(Object.assign({result:null},h.s)) }));
+
+    const connMap={ idle:{t:'Connect',dot:'#6e6e76',det:'No printer connected'}, scan:{t:'Scanning…',dot:'#f5d12e',det:'Searching nearby…'}, on:{t:'Connected',dot:'#2fc46a',det:s.addr} };
+    const cm=connMap[s.conn];
+    const connDotStyle='width:9px;height:9px;border-radius:50%;flex:none;background:'+cm.dot+(s.conn==='scan'?';animation:gPulse 1s infinite':'')+(s.conn==='on'?';box-shadow:0 0 8px '+cm.dot:'');
+    const connText = s.conn==='on' ? 'LetraTag 200B' : cm.t;
+    const connPillStyle='display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:20px;border:1px solid '+(s.conn==='on'?'rgba(47,196,106,.4)':'rgba(255,255,255,.12)')+';background:'+(s.conn==='on'?'rgba(47,196,106,.1)':'rgba(255,255,255,.03)')+';color:#dcdce2;font-size:12px;font-weight:600;cursor:pointer;';
+
+    const printing=s.printing;
+    const printLabel = printing ? 'Printing…' : (s.conn==='on' ? 'Print label' : 'Connect & print');
+    const pBase='border:none;border-radius:9px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;';
+    const pBg = printing ? 'background:#2a2a30;color:#9a9aa2;' : 'background:'+ac.grad+';background-size:200% 100%;box-shadow:0 8px 22px -8px '+this.hexA(ac.hex,.8)+';'+(this.props.accent==='rainbow'?'animation:gFlow 4s linear infinite;':'');
+    const printBtnStyle=pBase+pBg+'padding:10px 20px;';
+    const printBtnWideStyle=pBase+pBg+'padding:15px;width:100%;font-size:15px;';
+
+    const res=s.result;
+    const resultText = printing ? 'Sending to print head…' : (res ? res.t : '');
+    const resultColor = res ? (res.ok ? '#2fc46a' : '#ff6a5c') : '#8a8a92';
+
+    const glowOn = this.props.glow!==false;
+    const glowStyle = glowOn
+      ? 'position:absolute;width:60%;height:55%;top:8%;left:20%;border-radius:50%;background:radial-gradient(circle,'+this.hexA(ac.hex,.16)+',transparent 70%);filter:blur(20px);pointer-events:none;'
+      : 'display:none;';
+
+    const tape=this.TAPES[s.tape];
+    return {
+      line1:s.line1, line2:s.line2, twoLines:s.twoLines, padding:s.padding, barcode:s.barcode,
+      dither:s.dither, ensureMac:s.ensureMac, stretch:s.stretch, timeout:s.timeout,
+      onL1:e=>this.setState({line1:e.target.value,result:null}),
+      onL2:e=>this.setState({line2:e.target.value,result:null}),
+      onBar:e=>this.setState({barcode:e.target.value,result:null}),
+      onPad:e=>this.setState({padding:+e.target.value}),
+      onDither:e=>this.setState({dither:e.target.checked}),
+      onMac:e=>this.setState({ensureMac:e.target.checked}),
+      onStretch:e=>this.setState({stretch:+e.target.value}),
+      onTimeout:e=>this.setState({timeout:+e.target.value}),
+      toggleTwo:()=>this.setState({twoLines:!s.twoLines}),
+      fontS:()=>this.setState({font:'S'}), fontM:()=>this.setState({font:'M'}), fontL:()=>this.setState({font:'L'}),
+      toggleBold:()=>this.setState({bold:!s.bold}), toggleUnder:()=>this.setState({underline:!s.underline}), toggleInv:()=>this.setState({invert:!s.invert}),
+      alignL:()=>this.setState({align:'left'}), alignC:()=>this.setState({align:'center'}), alignR:()=>this.setState({align:'right'}),
+      toggleDate:()=>this.setState({date:!s.date}),
+      setText:()=>this.setState({mode:'text',result:null}), setBar:()=>this.setState({mode:'barcode',result:null}),
+      toggleConn:()=>this.toggleConn(), doPrint:()=>this.doPrint(),
+      refA:this.ref('A'), refB:this.ref('B'), refC:this.ref('C'),
+      seg, tapeItems, iconItems, templateItems, history, noHistory:s.history.length===0,
+      connDotStyle, connText, connPillStyle, connTitle:(s.conn==='on'?'Connected':s.conn==='scan'?'Scanning':'Disconnected'),
+      connDetail:cm.det, connBtnLabel:(s.conn==='on'?'Disconnect':s.conn==='scan'?'Cancel':'Scan for printer'),
+      connBtnStyle:'width:100%;padding:9px;border-radius:8px;border:1px solid '+(s.conn==='on'?'rgba(255,255,255,.12)':ac.hex)+';background:'+(s.conn==='on'?'rgba(255,255,255,.04)':this.hexA(ac.hex,.16))+';color:'+(s.conn==='on'?'#cfcfd6':'#eaf2ff')+';font-size:12px;font-weight:700;cursor:pointer;',
+      connCardBg:(s.conn==='on'?'rgba(47,196,106,.07)':'rgba(255,255,255,.02)'),
+      connCardBorder:(s.conn==='on'?'rgba(47,196,106,.25)':'rgba(255,255,255,.07)'),
+      printLabel, printBtnStyle, printBtnWideStyle, resultText, resultColor,
+      glowStyle, accentHex:ac.hex,
+      sizeNote:'12 mm tall · ~'+Math.max(8,Math.round((this._lastW||40)*0.127*s.stretch))+' mm printed', tapeName:tape.label,
+      secLabel:'font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#62626a;margin-bottom:9px;',
+      filename:(s.mode==='barcode'?'barcode':'label')+'-'+(s.line1||'untitled').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,16)+'.png',
+      line2InputStyle:(s.twoLines?'flex:1;':'flex:1;opacity:.4;pointer-events:none;')+'padding:11px 13px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:14px;font-weight:600;',
+      line2InputStyleB:(s.twoLines?'':'opacity:.4;pointer-events:none;')+'width:100%;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#f2f2f4;font-size:14px;font-weight:600;text-align:center;',
+      line2InputStyleC:(s.twoLines?'':'opacity:.4;pointer-events:none;')+'width:100%;padding:9px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:13px;font-weight:600;',
+      statusBar: s.conn==='on' ? ('● '+s.addr+'  ·  RSSI '+s.rssi+' dBm  ·  battery OK') : '○ not connected  ·  open the lid, insert cassette'
+    };
+  }
+}
+</script>
+</body>
+</html>

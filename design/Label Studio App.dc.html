@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@keyframes gPulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.25)}}
+@keyframes gFlow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes gRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes gFade{from{opacity:0}to{opacity:1}}
+@keyframes gRing{0%{transform:scale(.45);opacity:.65}100%{transform:scale(1.7);opacity:0}}
+@keyframes gFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes gSpin{to{transform:rotate(360deg)}}
+@keyframes gSlide{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes gPop{from{transform:scale(.96)}to{transform:scale(1)}}
+*{box-sizing:border-box}
+body{margin:0}
+input,button,textarea{font-family:inherit}
+input:focus,textarea:focus{outline:none}
+::placeholder{color:#54545c}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:6px}
+.gcv{image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Anton&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+</helmet>
+<div style="position:relative;width:100vw;height:100vh;min-height:560px;overflow:hidden;background:#08080a;color:#f2f2f4;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter','Segoe UI',system-ui,sans-serif;">
+
+  <!-- ================= EDITOR ================= -->
+  <sc-if value="{{ showEditor }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+
+    <!-- titlebar -->
+    <div style="height:48px;flex:none;display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.06);background:#0b0b0e;">
+      <img src="assets/gerdsenai-logo.png" style="width:26px;height:26px;border-radius:7px;display:block;" />
+      <span style="font-size:13px;font-weight:700;">Label Studio</span>
+      <span style="font-size:11px;color:#56565e;font-weight:600;padding:2px 7px;border:1px solid rgba(255,255,255,.08);border-radius:20px;">v0.1 · MIT</span>
+      <div style="flex:1;display:flex;justify-content:center;"><span style="font-size:12px;color:#62626a;font-weight:600;font-family:ui-monospace,Menlo,monospace;">{{ filename }}</span></div>
+      <button onClick="{{ openSettings }}" style="width:32px;height:32px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#cfcfd6;cursor:pointer;display:flex;align-items:center;justify-content:center;">{{ settingsGlyph }}</button>
+      <button onClick="{{ pillClick }}" style="{{ connPillStyle }}"><span style="{{ connDotStyle }}"></span>{{ connText }}</button>
+    </div>
+
+    <div style="flex:1;display:flex;min-height:0;">
+
+      <!-- sidebar -->
+      <div style="width:300px;flex:none;border-right:1px solid rgba(255,255,255,.06);background:#0b0b0e;display:flex;flex-direction:column;">
+        <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:20px;">
+
+          <div>
+            <div style="{{ secLabel }}">Content</div>
+            <div style="display:flex;gap:6px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);margin-bottom:10px;">
+              <button onClick="{{ setText }}" style="{{ seg.modeTextWide }}">Text</button>
+              <button onClick="{{ setBar }}" style="{{ seg.modeBarWide }}">Barcode</button>
+            </div>
+            <sc-if value="{{ isText }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <input value="{{ line1 }}" onInput="{{ onL1 }}" placeholder="Line 1" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:13px;font-weight:600;" />
+              <input value="{{ line2 }}" onInput="{{ onL2 }}" placeholder="Line 2" style="{{ line2Style }}" />
+              <div style="display:flex;gap:7px;">
+                <button onClick="{{ toggleTwo }}" style="{{ seg.twoFlex }}">2 lines</button>
+                <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+                  <button onClick="{{ alignL }}" style="{{ seg.aL }}">‹</button>
+                  <button onClick="{{ alignC }}" style="{{ seg.aC }}">≡</button>
+                  <button onClick="{{ alignR }}" style="{{ seg.aR }}">›</button>
+                </div>
+              </div>
+            </div>
+            </sc-if>
+            <sc-if value="{{ isBarcode }}" hint-placeholder-val="{{ false }}">
+            <input value="{{ barcode }}" onInput="{{ onBar }}" placeholder="Barcode data" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:12px;font-weight:600;font-family:ui-monospace,Menlo,monospace;" />
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ isText }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="{{ secLabel }}">Typeface</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+              <sc-for list="{{ fontItems }}" as="ft" hint-placeholder-count="5">
+                <button onClick="{{ ft.pick }}" style="{{ ft.style }}">{{ ft.label }}</button>
+              </sc-for>
+            </div>
+            <div style="{{ secLabel }}">Style</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+              <div style="display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);">
+                <button onClick="{{ fontS }}" style="{{ seg.fS }}">S</button>
+                <button onClick="{{ fontM }}" style="{{ seg.fM }}">M</button>
+                <button onClick="{{ fontL }}" style="{{ seg.fL }}">L</button>
+              </div>
+              <button onClick="{{ toggleBold }}" style="{{ seg.bold }}">B</button>
+              <button onClick="{{ toggleUnder }}" style="{{ seg.under }}">U</button>
+              <button onClick="{{ toggleInv }}" style="{{ seg.inv }}">Inv</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:11px;color:#8a8a92;font-weight:600;white-space:nowrap;">Padding</span>
+              <input type="range" min="0" max="6" step="1" value="{{ padding }}" onInput="{{ onPad }}" style="flex:1;accent-color:{{ accentHex }};" />
+              <span style="font-size:11px;color:#cfcfd6;font-weight:700;width:14px;">{{ padding }}</span>
+            </div>
+          </div>
+
+          <div>
+            <div style="{{ secLabel }}">Extras</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+              <sc-for list="{{ iconItems }}" as="ic" hint-placeholder-count="10">
+                <button onClick="{{ ic.pick }}" style="{{ ic.style }}">{{ ic.glyph }}</button>
+              </sc-for>
+            </div>
+            <button onClick="{{ toggleDate }}" style="{{ seg.dateFull }}">Insert today's date</button>
+          </div>
+          </sc-if>
+
+          <div>
+            <div style="{{ secLabel }}">Tape colour</div>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;">
+              <sc-for list="{{ tapeItems }}" as="t" hint-placeholder-count="7">
+                <button onClick="{{ t.pick }}" title="{{ t.label }}" style="{{ t.swatch }}"></button>
+              </sc-for>
+            </div>
+            <div style="font-size:11px;color:#62626a;font-weight:600;margin-top:8px;">{{ tapeName }} · black thermal print</div>
+          </div>
+
+          <div>
+            <div style="{{ secLabel }}">Templates</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <sc-for list="{{ templateItems }}" as="tp" hint-placeholder-count="8">
+                <button onClick="{{ tp.pick }}" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02);color:#cfcfd6;font-size:12px;font-weight:600;cursor:pointer;text-align:left;"><span style="width:18px;display:flex;align-items:center;justify-content:center;color:#9a9aa2;">{{ tp.icon }}</span>{{ tp.name }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- canvas + status -->
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+        <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(130% 130% at 50% -5%,#15151c,#0a0a0d 68%);overflow:hidden;padding:32px;">
+          <div style="{{ glowStyle }}"></div>
+
+          <sc-if value="{{ labelEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;">
+            <div style="width:220px;height:64px;border:2px dashed rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#4a4a52;font-size:13px;font-weight:600;">your label</div>
+            <div style="font-size:13px;color:#6e6e76;font-weight:600;">Type in the sidebar to design a label</div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ labelFilled }}" hint-placeholder-val="{{ true }}">
+          <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px;">
+            <div style="position:relative;padding:20px;border-radius:9px;background:rgba(0,0,0,.32);box-shadow:0 16px 55px -14px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.06);max-width:760px;overflow:hidden;">
+              <canvas class="gcv" ref="{{ refMain }}"></canvas>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:#62626a;font-weight:600;letter-spacing:.02em;">
+              <span>{{ sizeNote }}</span><span style="opacity:.4;">·</span><span>{{ tapeName }} tape</span>
+            </div>
+          </div>
+          </sc-if>
+
+          <div style="position:absolute;top:18px;right:20px;z-index:2;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:12px;font-weight:600;color:{{ resultColor }};min-height:16px;">{{ resultText }}</span>
+            <button onClick="{{ doPrint }}" style="{{ printBtnStyle }}">{{ printIcon }} {{ printLabel }}</button>
+          </div>
+        </div>
+
+        <div style="height:42px;flex:none;padding:0 18px;border-top:1px solid rgba(255,255,255,.06);background:#0b0b0e;display:flex;align-items:center;gap:14px;">
+          <span style="font-size:11px;color:#8a8a92;font-weight:600;font-family:ui-monospace,Menlo,monospace;white-space:nowrap;">{{ statusBar }}</span>
+          <div style="flex:1;"></div>
+          <span style="font-size:11px;color:#56565e;font-weight:600;">Recent</span>
+          <div style="display:flex;gap:6px;max-width:50vw;overflow-x:auto;">
+            <sc-for list="{{ history }}" as="h" hint-placeholder-count="0">
+              <button onClick="{{ h.pick }}" style="flex:none;padding:5px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#b6b6bd;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;">{{ h.text }}</button>
+            </sc-for>
+            <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;color:#42424a;font-weight:600;">nothing printed yet</span></sc-if>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= CONNECT / FIRST RUN ================= -->
+  <sc-if value="{{ showConnect }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(115% 80% at 50% -5%,#15151f,#08080a 62%);padding:40px;">
+
+    <div style="position:relative;width:220px;height:200px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;">
+      <sc-if value="{{ scanning }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;width:130px;height:130px;border-radius:50%;border:1.5px solid {{ accentHex }};animation:gRing 2s ease-out infinite;"></div>
+        <div style="position:absolute;width:130px;height:130px;border-radius:50%;border:1.5px solid {{ accentHex }};animation:gRing 2s ease-out infinite .66s;"></div>
+        <div style="position:absolute;width:130px;height:130px;border-radius:50%;border:1.5px solid {{ accentHex }};animation:gRing 2s ease-out infinite 1.33s;"></div>
+      </sc-if>
+      <img src="assets/gerdsenai-logo.png" style="width:132px;height:132px;border-radius:26px;display:block;animation:gFloat 5s ease-in-out infinite;box-shadow:0 20px 60px -20px rgba(0,0,0,.7);" />
+    </div>
+
+    <div style="font-size:24px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px;text-align:center;">{{ connHeading }}</div>
+    <div style="font-size:14px;color:#8a8a92;font-weight:500;margin-bottom:28px;text-align:center;max-width:380px;line-height:1.5;">{{ connSub }}</div>
+
+    <sc-if value="{{ showFound }}" hint-placeholder-val="{{ false }}">
+    <div style="width:380px;max-width:100%;border-radius:14px;padding:16px;background:rgba(255,255,255,.03);border:1px solid {{ accentBorder }};display:flex;align-items:center;gap:14px;margin-bottom:18px;animation:gPop .3s ease;box-shadow:0 0 0 1px {{ accentBorder }},0 12px 40px -16px {{ accentGlow }};">
+      <div style="width:44px;height:44px;flex:none;border-radius:11px;background:linear-gradient(135deg,#1c1c22,#101014);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05);color:#cfcfd6;">{{ printerIcon }}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:700;">DYMO LetraTag 200B</div>
+        <div style="font-size:11px;color:#8a8a92;font-weight:600;font-family:ui-monospace,Menlo,monospace;">{{ foundAddr }}</div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:2px;height:18px;">
+        <sc-for list="{{ signalBars }}" as="b" hint-placeholder-count="4">
+          <div style="{{ b }}"></div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{ showScanBtn }}" hint-placeholder-val="{{ true }}">
+    <button onClick="{{ startScan }}" style="{{ scanBtnStyle }}">{{ scanBtnLabel }}</button>
+    </sc-if>
+    <sc-if value="{{ showFound }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ connectFound }}" style="{{ scanBtnStyle }}">{{ connectBtnLabel }}</button>
+    </sc-if>
+
+    <div style="display:flex;align-items:center;gap:18px;margin-top:30px;">
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#6e6e76;font-weight:600;">{{ checkGlyph }} Bluetooth on</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#6e6e76;font-weight:600;">{{ checkGlyph }} Lid closed</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#6e6e76;font-weight:600;">{{ checkGlyph }} Cassette inserted</span>
+    </div>
+
+    <button onClick="{{ skipOffline }}" style="margin-top:22px;background:none;border:none;color:#62626a;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Design without a printer →</button>
+  </div>
+  </sc-if>
+
+  <!-- ================= PRINT OVERLAY ================= -->
+  <sc-if value="{{ showPrint }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(4,4,6,.72);backdrop-filter:blur(6px);">
+    <div style="width:420px;max-width:90%;border-radius:18px;background:#101013;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px -20px rgba(0,0,0,.7);padding:26px;animation:gPop .25s ease;">
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <div style="padding:12px;border-radius:8px;background:rgba(0,0,0,.4);box-shadow:0 0 0 1px rgba(255,255,255,.06);max-width:100%;overflow:hidden;">
+          <canvas class="gcv" ref="{{ refMini }}"></canvas>
+        </div>
+      </div>
+
+      <sc-if value="{{ printRunning }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <div style="width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.15);border-top-color:{{ accentHex }};animation:gSpin .8s linear infinite;"></div>
+          <span style="font-size:14px;font-weight:700;">{{ printStageText }}</span>
+        </div>
+        <div style="height:7px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;">
+          <div style="{{ progressBarStyle }}"></div>
+        </div>
+        <div style="font-size:11px;color:#8a8a92;font-weight:600;margin-top:9px;font-family:ui-monospace,Menlo,monospace;">{{ printSubText }}</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ printDone }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;animation:gPop .25s ease;">
+        <div style="{{ resultIconStyle }}">{{ resultIcon }}</div>
+        <div style="font-size:17px;font-weight:700;margin-bottom:6px;">{{ resultBig }}</div>
+        <div style="font-size:13px;color:#8a8a92;font-weight:500;margin-bottom:22px;line-height:1.5;">{{ resultDetail }}</div>
+        <div style="display:flex;gap:10px;">
+          <button onClick="{{ closePrint }}" style="flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#cfcfd6;font-size:13px;font-weight:700;cursor:pointer;">Done</button>
+          <button onClick="{{ doPrint }}" style="{{ againBtnStyle }}">{{ againLabel }}</button>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= SETTINGS ================= -->
+  <sc-if value="{{ settingsOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:absolute;inset:0;z-index:50;display:flex;justify-content:flex-end;">
+    <div onClick="{{ closeSettings }}" style="position:absolute;inset:0;background:rgba(4,4,6,.55);"></div>
+    <div style="position:relative;width:380px;max-width:90%;height:100%;background:#0d0d10;border-left:1px solid rgba(255,255,255,.08);box-shadow:-20px 0 60px -20px rgba(0,0,0,.6);display:flex;flex-direction:column;">
+      <div style="height:48px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.06);">
+        <span style="font-size:14px;font-weight:700;">Settings</span>
+        <button onClick="{{ closeSettings }}" style="width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:#cfcfd6;cursor:pointer;display:flex;align-items:center;justify-content:center;">{{ closeGlyph }}</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:22px;">
+
+        <div>
+          <div style="{{ secLabel }}">Printer</div>
+          <div style="border-radius:11px;padding:14px;background:{{ connCardBg }};border:1px solid {{ connCardBorder }};">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">
+              <span style="{{ connDotStyle }}"></span><span style="font-size:13px;font-weight:700;">{{ connTitle }}</span>
+            </div>
+            <div style="font-size:11px;color:#8a8a92;font-weight:600;font-family:ui-monospace,Menlo,monospace;margin-bottom:4px;">{{ settingsDetail }}</div>
+            <div style="font-size:11px;color:#8a8a92;font-weight:600;margin-bottom:12px;">{{ settingsBattery }}</div>
+            <div style="display:flex;gap:8px;">
+              <sc-if value="{{ isConnected }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ forget }}" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,106,92,.3);background:rgba(255,106,92,.1);color:#ff8a7e;font-size:12px;font-weight:700;cursor:pointer;">Forget printer</button>
+              </sc-if>
+              <sc-if value="{{ notConnected }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ goConnect }}" style="{{ connBtnStyle }}">Connect a printer</button>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="{{ secLabel }}">Print defaults</div>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;color:#cfcfd6;font-weight:600;">
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">Floyd–Steinberg dither<input type="checkbox" checked="{{ dither }}" onChange="{{ onDither }}" style="accent-color:{{ accentHex }};width:16px;height:16px;" /></label>
+            <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">Strict MAC match<input type="checkbox" checked="{{ ensureMac }}" onChange="{{ onMac }}" style="accent-color:{{ accentHex }};width:16px;height:16px;" /></label>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">Stretch ×{{ stretch }}<input type="range" min="1" max="4" step="1" value="{{ stretch }}" onInput="{{ onStretch }}" style="width:130px;accent-color:{{ accentHex }};" /></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">Scan timeout {{ timeout }}s<input type="range" min="3" max="15" step="1" value="{{ timeout }}" onInput="{{ onTimeout }}" style="width:130px;accent-color:{{ accentHex }};" /></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="{{ secLabel }}">About</div>
+          <div style="font-size:12px;color:#8a8a92;font-weight:500;line-height:1.7;">
+            GerdsenAI Label Studio · v0.1<br/>
+            Open-source desktop client for the DYMO LetraTag 200B.<br/>
+            Bluetooth engine: <span style="color:#cfcfd6;font-weight:600;">ysfchn/dymo-bluetooth</span> (MIT).<br/>
+            Built with Tauri · Rust · WebView.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;green&quot;,&quot;blue&quot;,&quot;violet&quot;,&quot;rainbow&quot;],&quot;default&quot;:&quot;green&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;defaultTape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;white&quot;,&quot;clear&quot;,&quot;yellow&quot;,&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;,&quot;silver&quot;],&quot;default&quot;:&quot;white&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;glow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.canvases = {};
+    this.cfg = { main:{maxW:760,scale:15}, mini:{maxW:300,scale:7} };
+    this.tapeOrder = ['white','clear','yellow','red','green','blue','silver'];
+    this.TAPES = {
+      white:{paper:'#f4f3ec', ink:'#1a1a1a', label:'White', fg:'#f4f3ec', sw:'#f4f3ec'},
+      clear:{paper:'clear', ink:'#1c1c1c', label:'Clear', fg:'#e7ebf0', sw:'linear-gradient(135deg,#cfd4da 25%,#aeb4bc 25% 50%,#cfd4da 50% 75%,#aeb4bc 75%)'},
+      yellow:{paper:'#f5d12e', ink:'#1a1a1a', label:'Yellow', fg:'#f5d12e', sw:'#f5d12e'},
+      red:{paper:'#d8433b', ink:'#161616', label:'Red', fg:'#f3e3e2', sw:'#d8433b'},
+      green:{paper:'#54b75f', ink:'#11210f', label:'Green', fg:'#eaf6ea', sw:'#54b75f'},
+      blue:{paper:'#4f93d1', ink:'#0e1620', label:'Blue', fg:'#eaf2fb', sw:'#4f93d1'},
+      silver:{paper:'silver', ink:'#1a1a1a', label:'Silver', fg:'#f0f1f2', sw:'linear-gradient(135deg,#e2e5e7,#b3b7ba 50%,#d3d6d8)'}
+    };
+    this.ICONS = ['','★','♥','✓','→','●','⚡','☂','✿','✱'];
+    // Curated label typefaces (loaded via Google Fonts in helmet)
+    this.FONTS = {
+      condensed:{label:'Condensed', stack:"'Oswald','Arial Narrow','Roboto Condensed',sans-serif"},
+      grotesk:{label:'Grotesk', stack:"'Space Grotesk',system-ui,sans-serif"},
+      mono:{label:'Mono', stack:"'JetBrains Mono',ui-monospace,Menlo,monospace"},
+      display:{label:'Display', stack:"'Anton','Arial Narrow',sans-serif"},
+      script:{label:'Script', stack:"'Caveat',ui-rounded,cursive"}
+    };
+    this.fontOrder=['condensed','grotesk','mono','display','script'];
+    // Lucide icon path data (24×24, stroke)
+    this.ICON_PATHS = {
+      'id-card':'<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+      'folder':'<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+      'plug':'<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+      'archive':'<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+      'triangle-alert':'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+      'calendar':'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+      'mail':'<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+      'barcode':'<path d="M3 5v14"/><path d="M8 5v14"/><path d="M12 5v14"/><path d="M17 5v14"/><path d="M21 5v14"/>',
+      'printer':'<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect width="12" height="8" x="6" y="14" rx="1"/>',
+      'settings':'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      'x':'<path d="M18 6 6 18"/><path d="M6 6l12 12"/>',
+      'check':'<path d="M20 6 9 17l-5-5"/>',
+      'check-big':'<path d="M20 6 9 17l-5-5"/>'
+    };
+    this.TEMPLATES = [
+      {name:'Name badge', lucide:'id-card', s:{line1:'HELLO', line2:'my name is', twoLines:true, font:'M', bold:true, align:'center', mode:'text', invert:false, icon:'', date:false}},
+      {name:'File folder', lucide:'folder', s:{line1:'TAXES 2026', line2:'', twoLines:false, font:'L', bold:true, align:'center', mode:'text', invert:false, icon:'', date:false}},
+      {name:'Cable label', lucide:'plug', s:{line1:'HDMI', line2:'living room TV', twoLines:true, font:'M', bold:true, align:'left', mode:'text', invert:false, icon:'→', date:false}},
+      {name:'Pantry jar', lucide:'archive', s:{line1:'FLOUR', line2:'', twoLines:false, font:'L', bold:true, align:'center', mode:'text', invert:false, icon:'', date:false}},
+      {name:'Fragile', lucide:'triangle-alert', s:{line1:'FRAGILE', line2:'', twoLines:false, font:'L', bold:true, align:'center', mode:'text', invert:true, icon:'', date:false}},
+      {name:'Opened on', lucide:'calendar', s:{line1:'OPENED', line2:'', twoLines:false, font:'M', bold:true, align:'center', mode:'text', invert:false, icon:'', date:true}},
+      {name:'Address', lucide:'mail', s:{line1:'A. GERDSEN', line2:'1 Neural Way', twoLines:true, font:'S', bold:false, align:'left', mode:'text', invert:false, icon:'', date:false}},
+      {name:'Barcode', lucide:'barcode', s:{mode:'barcode', barcode:'GERDSEN-200B'}}
+    ];
+    let paired=null; try{ paired=JSON.parse(localStorage.getItem('gerdsen_paired')||'null'); }catch(e){}
+    this.state = {
+      screen: paired ? 'editor' : 'connect',
+      conn: paired ? 'on' : 'idle',
+      addr: paired ? paired.addr : '', rssi: paired ? paired.rssi : 0, battery:'good',
+      line1:'GERDSEN', line2:'AI · LABS', twoLines:true,
+      font:'M', fontFamily:'condensed', bold:true, underline:false, invert:false, align:'center',
+      tape: this.TAPES[props.defaultTape]?props.defaultTape:'white',
+      mode:'text', barcode:'GERDSEN-200B', icon:'', date:false, padding:1,
+      print:null, history:[], settingsOpen:false,
+      dither:true, ensureMac:false, stretch:2, timeout:5
+    };
+  }
+  componentDidMount(){ this._t=setTimeout(()=>this.redrawAll(),30); this._onKey=this.onKey.bind(this); window.addEventListener('keydown',this._onKey); if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(()=>this.redrawAll()); } }
+  makeIcon(name,size,color){
+    return React.createElement('svg',{ width:size||16, height:size||16, viewBox:'0 0 24 24', fill:'none', stroke:color||'currentColor', strokeWidth:2, strokeLinecap:'round', strokeLinejoin:'round', dangerouslySetInnerHTML:{__html:this.ICON_PATHS[name]||''}, style:{display:'block',flex:'none'} });
+  }
+  componentDidUpdate(){ this.redrawAll(); }
+  componentWillUnmount(){ [this._t,this._ct,this._pt,this._iv].forEach(t=>clearTimeout(t)); clearInterval(this._iv); if(this._onKey) window.removeEventListener('keydown',this._onKey); }
+  onKey(e){
+    if((e.metaKey||e.ctrlKey) && (e.key==='p'||e.key==='P')){ if(this.state.screen==='editor'){ e.preventDefault(); this.doPrint(); } return; }
+    if(e.key==='Escape'){ if(this.state.print){ this.closePrint(); } else if(this.state.settingsOpen){ this.closeSettings(); } }
+  }
+
+  accent(){
+    const a=this.props.accent||'green';
+    if(a==='violet') return {hex:'#9b46e0', grad:'linear-gradient(90deg,#7b2fd6,#b85cf0)'};
+    if(a==='blue') return {hex:'#1f8bff', grad:'linear-gradient(90deg,#0f6fe6,#3f9bff)'};
+    if(a==='rainbow') return {hex:'#2fc46a', grad:'linear-gradient(90deg,#00FF41,#FFD700,#FF8C00,#FF4500,#FF1493,#9932CC,#0080FF)'};
+    return {hex:'#2fc46a', grad:'linear-gradient(90deg,#1ba85a,#46e08a)'};
+  }
+  hexA(hex,a){ const n=parseInt(hex.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+  todayStr(){ const d=new Date(); return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2); }
+  isEmpty(){ const s=this.state; if(s.mode==='barcode') return !(s.barcode||'').trim(); return !((s.line1||'').trim()||(s.twoLines&&(s.line2||'').trim())||s.icon||s.date); }
+
+  /* ---------- bitmap ---------- */
+  buildBitmap(){
+    const s=this.state, H=30;
+    if(s.mode==='barcode') return this.barcodeBitmap(s.barcode||'', H);
+    let L = s.twoLines ? [s.line1||'', s.line2||''] : [s.line1||''];
+    if(s.icon){ L[0] = s.icon+' '+L[0]; }
+    if(s.date){ if(s.twoLines){ L[1]=(L[1]?L[1]+'  ':'')+this.todayStr(); } else { L[0]=(L[0]?L[0]+'  ':'')+this.todayStr(); } }
+    const sizeMap = s.twoLines ? {S:10,M:12,L:14} : {S:17,M:22,L:26};
+    const px = sizeMap[s.font]||20;
+    const ff=(this.FONTS[s.fontFamily]||this.FONTS.condensed);
+    const weight = s.bold ? (s.fontFamily==='display'?'400':'700') : (s.fontFamily==='display'?'400':'500');
+    const font = weight+' '+px+'px '+ff.stack;
+    const m=document.createElement('canvas').getContext('2d');
+    m.font=font;
+    let tw=0; L.forEach(t=>{ tw=Math.max(tw, m.measureText(t||' ').width); });
+    tw=Math.ceil(tw)+6;
+    const pad=(s.padding||0)*7;
+    const W=Math.max(8, tw+pad*2);
+    const off=document.createElement('canvas'); off.width=W; off.height=H;
+    const c=off.getContext('2d');
+    c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+    c.fillStyle='#000'; c.font=font; c.textBaseline='middle'; c.textAlign=s.align;
+    const ax = s.align==='left'? pad+1 : s.align==='right'? W-pad-1 : W/2;
+    if(s.twoLines){ this.line(c,L[0],ax,H*0.29,s,px); this.line(c,L[1],ax,H*0.71,s,px); }
+    else { this.line(c,L[0],ax,H*0.5,s,px); }
+    const d=c.getImageData(0,0,W,H).data;
+    const data=new Uint8Array(W*H);
+    for(let i=0;i<W*H;i++){ const a=d[i*4+3], lum=(d[i*4]+d[i*4+1]+d[i*4+2])/3; data[i]=(a>60&&lum<140)?1:0; }
+    return {w:W,h:H,data};
+  }
+  line(c,text,x,y,s,px){
+    c.fillText(text||'',x,y);
+    if(s.underline && text){ const m=c.measureText(text).width; let lx=x; if(s.align==='center')lx=x-m/2; else if(s.align==='right')lx=x-m; c.fillRect(lx,Math.round(y+px*0.52),m,Math.max(1,Math.round(px*0.09))); }
+  }
+  barcodeBitmap(str,H){
+    str=(str||' ').toString();
+    const cols=[{w:9,ink:false},{w:1,ink:true},{w:1,ink:false},{w:1,ink:true}];
+    let toggle=true;
+    for(const ch of str){ const code=ch.charCodeAt(0); for(let k=0;k<3;k++){ const wd=((code>>k)&1)?2:1; cols.push({w:wd,ink:toggle}); toggle=!toggle; } }
+    cols.push({w:1,ink:true},{w:1,ink:false},{w:1,ink:true},{w:9,ink:false});
+    const W=cols.reduce((a,c)=>a+c.w,0);
+    const data=new Uint8Array(W*H);
+    const barH=Math.round(H*0.70);
+    let x=0; cols.forEach(co=>{ if(co.ink){ for(let xi=x;xi<x+co.w;xi++) for(let y=0;y<barH;y++) data[y*W+xi]=1; } x+=co.w; });
+    const off=document.createElement('canvas'); off.width=W; off.height=H;
+    const c=off.getContext('2d');
+    c.fillStyle='#fff'; c.fillRect(0,0,W,H);
+    c.fillStyle='#000'; c.font="700 8px 'Arial Narrow',system-ui,sans-serif"; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText(str.slice(0,42), W/2, H-5);
+    const d=c.getImageData(0,0,W,H).data;
+    for(let y=barH+1;y<H;y++) for(let xi=0;xi<W;xi++){ const i=y*W+xi; const a=d[i*4+3],lum=(d[i*4]+d[i*4+1]+d[i*4+2])/3; if(a>60&&lum<140) data[i]=1; }
+    return {w:W,h:H,data};
+  }
+
+  /* ---------- paint ---------- */
+  ref(id){ return (el)=>{ if(el){ this.canvases[id]=el; this.paint(id,this._bmp||this.buildBitmap()); } }; }
+  redrawAll(){ try{ const b=this.buildBitmap(); this._bmp=b; this._lastW=b.w; ['main','mini'].forEach(id=>this.paint(id,b)); }catch(e){ console.warn('draw',e); } }
+  paint(id,b){
+    const cv=this.canvases[id]; if(!cv||!b) return; const cfg=this.cfg[id];
+    let sc=Math.floor(cfg.maxW/Math.max(1,b.w)); sc=Math.max(2,Math.min(cfg.scale,sc)); if(!isFinite(sc)) sc=4;
+    cv.width=b.w*sc; cv.height=b.h*sc; cv.style.width=(b.w*sc)+'px'; cv.style.height=(b.h*sc)+'px';
+    const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+    const tape=this.TAPES[this.state.tape], inv=this.state.invert;
+    if(inv){ ctx.fillStyle='#161618'; ctx.fillRect(0,0,cv.width,cv.height); }
+    else this.fillPaper(ctx,cv,tape);
+    ctx.fillStyle = inv ? tape.fg : tape.ink;
+    for(let y=0;y<b.h;y++) for(let x=0;x<b.w;x++){ if(b.data[y*b.w+x]) ctx.fillRect(x*sc,y*sc,sc,sc); }
+  }
+  fillPaper(ctx,cv,tape){
+    if(tape.paper==='clear'){ const t=7; for(let y=0;y<cv.height;y+=t) for(let x=0;x<cv.width;x+=t){ ctx.fillStyle=((Math.floor(x/t)+Math.floor(y/t))%2===0)?'#3a3a40':'#2c2c31'; ctx.fillRect(x,y,t,t); } ctx.fillStyle='rgba(222,230,238,0.16)'; ctx.fillRect(0,0,cv.width,cv.height); return; }
+    if(tape.paper==='silver'){ const g=ctx.createLinearGradient(0,0,0,cv.height); g.addColorStop(0,'#e2e5e7'); g.addColorStop(.45,'#c4c8cb'); g.addColorStop(.55,'#aeb2b6'); g.addColorStop(1,'#cdd0d3'); ctx.fillStyle=g; ctx.fillRect(0,0,cv.width,cv.height); return; }
+    ctx.fillStyle=tape.paper; ctx.fillRect(0,0,cv.width,cv.height);
+  }
+
+  /* ---------- connect flow ---------- */
+  startScan(){ this.setState({conn:'scan'}); clearTimeout(this._ct); this._ct=setTimeout(()=>{ this.setState({conn:'found', addr:'DY:32:AF:'+this.rnd()+':'+this.rnd()+':'+this.rnd(), rssi:-(44+Math.floor(Math.random()*16))}); }, Math.min(2600, 800+this.state.timeout*180)); }
+  rnd(){ return Math.floor(16+Math.random()*239).toString(16).toUpperCase().padStart(2,'0'); }
+  connectFound(){ this.setState({conn:'pairing'}); clearTimeout(this._ct); this._ct=setTimeout(()=>{ try{ localStorage.setItem('gerdsen_paired', JSON.stringify({addr:this.state.addr, rssi:this.state.rssi})); }catch(e){} this.setState({conn:'on', screen:'editor'}); setTimeout(()=>this.redrawAll(),40); }, 1100); }
+  skipOffline(){ this.setState({screen:'editor', conn:'idle'}); setTimeout(()=>this.redrawAll(),40); }
+  forget(){ try{ localStorage.removeItem('gerdsen_paired'); }catch(e){} this.setState({conn:'idle', addr:'', rssi:0, settingsOpen:false, screen:'connect'}); }
+  goConnect(){ this.setState({settingsOpen:false, screen:'connect', conn:'idle'}); }
+  pillClick(){ if(this.state.conn==='on'){ this.openSettings(); } else { this.setState({screen:'connect', conn:'idle'}); } }
+  openSettings(){ this.setState({settingsOpen:true}); }
+  closeSettings(){ this.setState({settingsOpen:false}); }
+
+  /* ---------- print ---------- */
+  doPrint(){
+    if(this.state.print && this.state.print.stage!=='result') return;
+    if(this.isEmpty()){ return; }
+    if(this.state.conn!=='on'){ this.setState({screen:'connect', conn:'idle', print:null}); return; }
+    this.runPrint();
+  }
+  runPrint(){
+    clearInterval(this._iv); clearTimeout(this._pt);
+    const b=this._bmp||this.buildBitmap();
+    const chunks=Math.max(1, Math.ceil((b.w*4+25)/500));
+    this.setState({print:{stage:'raster', progress:0, chunks, sent:0, result:null}});
+    this._pt=setTimeout(()=>{
+      this.setState(st=>({print:Object.assign({}, st.print, {stage:'send'})}));
+      let p=0;
+      this._iv=setInterval(()=>{
+        p+=Math.max(4, Math.round(100/(chunks*1.2)));
+        if(p>=100){ p=100; clearInterval(this._iv); this._pt=setTimeout(()=>this.finishPrint(),350); }
+        this.setState(st=> st.print ? ({print:Object.assign({}, st.print, {progress:p, sent:Math.min(chunks, Math.round(p/100*chunks))})}) : {});
+      }, 140);
+    }, 650);
+  }
+  finishPrint(){
+    const codes=[{ok:true,big:'Label printed',det:'Sent to the LetraTag print head successfully.',icon:'✓'},{ok:true,big:'Label printed',det:'Sent successfully. Peel and stick.',icon:'✓'},{ok:true,big:'Label printed',det:'Done — though battery is getting low.',icon:'✓',warn:true},{ok:false,big:'No cassette detected',det:'Open the lid and insert a LetraTag cassette, then try again.',icon:'!'}];
+    const r=codes[Math.floor(Math.random()*codes.length)];
+    let hist=this.state.history;
+    if(r.ok){ const label=this.state.mode==='barcode'?('▮ '+this.state.barcode):(this.state.line1+(this.state.twoLines&&this.state.line2?' / '+this.state.line2:'')); hist=[{text:label, s:this.snapshot()}, ...hist].slice(0,8); }
+    this.setState({print:{stage:'result', result:r}, history:hist});
+  }
+  closePrint(){ clearInterval(this._iv); clearTimeout(this._pt); this.setState({print:null}); setTimeout(()=>this.redrawAll(),30); }
+  snapshot(){ const s=this.state; return {line1:s.line1,line2:s.line2,twoLines:s.twoLines,font:s.font,bold:s.bold,underline:s.underline,invert:s.invert,align:s.align,tape:s.tape,mode:s.mode,barcode:s.barcode,icon:s.icon,date:s.date,padding:s.padding}; }
+
+  /* ---------- styles ---------- */
+  segStyle(a){
+    const h=this.accent().hex;
+    return a
+      ? "padding:7px 11px;border-radius:7px;border:1px solid "+h+";background:"+this.hexA(h,.18)+";color:#eaf2ff;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .14s;min-width:30px;"
+      : "padding:7px 11px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:#9a9aa2;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .14s;min-width:30px;";
+  }
+
+  renderVals(){
+    const s=this.state, ac=this.accent();
+    const seg={
+      fS:this.segStyle(s.font==='S'), fM:this.segStyle(s.font==='M'), fL:this.segStyle(s.font==='L'),
+      bold:this.segStyle(s.bold), under:this.segStyle(s.underline), inv:this.segStyle(s.invert),
+      aL:this.segStyle(s.align==='left'), aC:this.segStyle(s.align==='center'), aR:this.segStyle(s.align==='right'),
+      modeText:this.segStyle(s.mode==='text'), modeBar:this.segStyle(s.mode==='barcode'),
+      two:this.segStyle(s.twoLines), dateFull:this.segStyle(s.date)+';width:100%;'
+    };
+    seg.twoFlex=seg.two+';flex:1;';
+    seg.modeTextWide=this.segStyle(s.mode==='text')+';flex:1;text-align:center;padding:9px;';
+    seg.modeBarWide=this.segStyle(s.mode==='barcode')+';flex:1;text-align:center;padding:9px;';
+
+    const tapeItems=this.tapeOrder.map(id=>{
+      const tp=this.TAPES[id], on=s.tape===id;
+      const ring = on ? '0 0 0 2px '+ac.hex+',0 0 0 4px rgba(0,0,0,.5)' : '0 0 0 1px rgba(255,255,255,.18)';
+      return { id, label:tp.label, pick:()=>this.setState({tape:id}),
+        swatch:'width:32px;height:32px;border-radius:9px;border:none;cursor:pointer;background:'+tp.sw+';box-shadow:'+ring+';padding:0;transition:box-shadow .14s;' };
+    });
+    const iconItems=this.ICONS.map(g=>({ glyph:g===''?'∅':g, pick:()=>this.setState({icon:g}),
+      style:this.segStyle(s.icon===g)+';width:34px;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;padding:0;' }));
+    const templateItems=this.TEMPLATES.map(t=>({ name:t.name, icon:this.makeIcon(t.lucide,16,'#9a9aa2'), pick:()=>this.setState(Object.assign({},t.s)) }));
+    const fontItems=this.fontOrder.map(id=>{
+      const ff=this.FONTS[id], on=s.fontFamily===id;
+      return { id, label:ff.label, pick:()=>this.setState({fontFamily:id}),
+        style:this.segStyle(on)+';font-family:'+ff.stack+';'+(id==='display'?'letter-spacing:.02em;':'')+(id==='script'?'font-size:14px;':'font-size:12px;') };
+    });
+    const history=s.history.map(h=>({ text:h.text, pick:()=>this.setState(Object.assign({},h.s)) }));
+
+    const connColors={ idle:'#6e6e76', scan:'#f5d12e', found:ac.hex, pairing:ac.hex, on:'#2fc46a' };
+    const cdot=connColors[s.conn]||'#6e6e76';
+    const connDotStyle='width:9px;height:9px;border-radius:50%;flex:none;background:'+cdot+((s.conn==='scan'||s.conn==='pairing')?';animation:gPulse 1s infinite':'')+(s.conn==='on'?';box-shadow:0 0 8px '+cdot:'');
+    const connText = s.conn==='on' ? 'LetraTag 200B' : s.conn==='scan' ? 'Scanning…' : s.conn==='pairing' ? 'Pairing…' : 'Connect';
+    const connPillStyle='display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:20px;border:1px solid '+(s.conn==='on'?'rgba(47,196,106,.4)':'rgba(255,255,255,.12)')+';background:'+(s.conn==='on'?'rgba(47,196,106,.1)':'rgba(255,255,255,.03)')+';color:#dcdce2;font-size:12px;font-weight:600;cursor:pointer;';
+
+    const empty=this.isEmpty();
+    const printRunning = !!(s.print && s.print.stage!=='result');
+    const printLabel = printRunning ? 'Printing…' : (s.conn==='on' ? 'Print' : 'Connect & print');
+    const pBase='display:inline-flex;align-items:center;gap:6px;border:none;border-radius:9px;color:#0a0a0a;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;padding:9px 18px;';
+    const disabled = empty && s.mode==='text';
+    const pBg = (printRunning||disabled) ? 'background:#2a2a30;color:#76767e;cursor:default;' : 'background:'+ac.grad+';background-size:200% 100%;box-shadow:0 8px 22px -8px '+this.hexA(ac.hex,.8)+';'+(this.props.accent==='rainbow'?'color:#fff;animation:gFlow 4s linear infinite;':'');
+    const printBtnStyle=pBase+pBg;
+
+    const res = (s.print&&s.print.stage==='result') ? s.print.result : null;
+    const resultText = res ? (res.ok ? (res.warn?'Printed · battery low':'Printed') : 'Print failed') : '';
+    const resultColor = res ? (res.ok ? (res.warn?'#f5c542':'#2fc46a') : '#ff6a5c') : '#8a8a92';
+
+    // connect screen text
+    const headings={ idle:"Let's find your label maker", scan:'Scanning for printers…', found:'Found it', pairing:'Pairing…' };
+    const subs={ idle:'Turn the LetraTag 200B on and keep it nearby. We connect over Bluetooth — no phone app needed.', scan:'Hold tight while we look for a DYMO LetraTag 200B over Bluetooth.', found:'Your printer is ready to pair.', pairing:'Establishing a secure Bluetooth connection…' };
+    const scanBtnStyle='padding:13px 30px;border-radius:11px;border:none;background:'+ac.grad+';background-size:200% 100%;color:'+(this.props.accent==='rainbow'?'#fff':'#0a0a0a')+';font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px -10px '+this.hexA(ac.hex,.85)+';'+(s.conn==='scan'||s.conn==='pairing'?'opacity:.6;pointer-events:none;':'');
+    const strength = s.rssi>-50?4:s.rssi>-58?3:s.rssi>-66?2:1;
+    const signalBars=[0,1,2,3].map(i=>'width:4px;border-radius:1px;height:'+(6+i*4)+'px;background:'+(i<strength?ac.hex:'rgba(255,255,255,.14)')+';');
+
+    // print overlay
+    const pr=s.print;
+    const printStageText = pr ? (pr.stage==='raster'?'Rasterizing label…':'Sending to LetraTag') : '';
+    const printSubText = pr ? (pr.stage==='raster' ? ('1-bit · '+(this._lastW||0)+'×30 px · stretch ×'+s.stretch) : ('chunk '+(pr.sent||0)+' / '+(pr.chunks||1)+'  ·  '+(pr.progress||0)+'%')) : '';
+    const progressBarStyle='height:100%;width:'+((pr&&pr.progress)||0)+'%;background:'+ac.grad+';transition:width .14s linear;border-radius:6px;';
+    const rOk = res&&res.ok, rWarn=res&&res.warn;
+    const ic = rOk ? (rWarn?'#f5c542':'#2fc46a') : '#ff6a5c';
+    const resultIcon = res ? this.makeIcon(rOk?'check':'triangle-alert',28,ic) : '';
+    const resultIconStyle='width:56px;height:56px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:'+ic+';background:'+this.hexA(ic.length===7?ic:'#2fc46a',.14)+';';
+    const againBtnStyle='flex:1;padding:12px;border-radius:10px;border:none;background:'+ac.grad+';color:'+(this.props.accent==='rainbow'?'#fff':'#0a0a0a')+';font-size:13px;font-weight:700;cursor:pointer;';
+
+    const glowOn=this.props.glow!==false;
+    const glowStyle = glowOn ? 'position:absolute;width:55%;height:55%;top:6%;left:22%;border-radius:50%;background:radial-gradient(circle,'+this.hexA(ac.hex,.14)+',transparent 70%);filter:blur(24px);pointer-events:none;' : 'display:none;';
+
+    const tape=this.TAPES[s.tape];
+    return {
+      // screen flags
+      showEditor:s.screen==='editor', showConnect:s.screen==='connect',
+      showPrint:!!s.print, settingsOpen:s.settingsOpen,
+      isText:s.mode==='text', isBarcode:s.mode==='barcode',
+      labelEmpty: empty, labelFilled: !empty,
+      scanning:s.conn==='scan', showFound:s.conn==='found', showScanBtn:(s.conn==='idle'||s.conn==='scan'),
+      printRunning, printDone:!!res, isConnected:s.conn==='on', notConnected:s.conn!=='on',
+      noHistory:s.history.length===0,
+
+      // values
+      line1:s.line1, line2:s.line2, twoLines:s.twoLines, padding:s.padding, barcode:s.barcode,
+      dither:s.dither, ensureMac:s.ensureMac, stretch:s.stretch, timeout:s.timeout,
+      tapeItems, iconItems, templateItems, fontItems, history,
+      printerIcon:this.makeIcon('printer',22,'#cfcfd6'),
+      seg, accentHex:ac.hex, accentBorder:this.hexA(ac.hex,.4), accentGlow:this.hexA(ac.hex,.5),
+
+      // handlers
+      onL1:e=>this.setState({line1:e.target.value,print:null}),
+      onL2:e=>this.setState({line2:e.target.value,print:null}),
+      onBar:e=>this.setState({barcode:e.target.value,print:null}),
+      onPad:e=>this.setState({padding:+e.target.value}),
+      onDither:e=>this.setState({dither:e.target.checked}),
+      onMac:e=>this.setState({ensureMac:e.target.checked}),
+      onStretch:e=>this.setState({stretch:+e.target.value}),
+      onTimeout:e=>this.setState({timeout:+e.target.value}),
+      toggleTwo:()=>this.setState({twoLines:!s.twoLines}),
+      fontS:()=>this.setState({font:'S'}), fontM:()=>this.setState({font:'M'}), fontL:()=>this.setState({font:'L'}),
+      toggleBold:()=>this.setState({bold:!s.bold}), toggleUnder:()=>this.setState({underline:!s.underline}), toggleInv:()=>this.setState({invert:!s.invert}),
+      alignL:()=>this.setState({align:'left'}), alignC:()=>this.setState({align:'center'}), alignR:()=>this.setState({align:'right'}),
+      toggleDate:()=>this.setState({date:!s.date}),
+      setText:()=>this.setState({mode:'text',print:null}), setBar:()=>this.setState({mode:'barcode',print:null}),
+      startScan:()=>this.startScan(), connectFound:()=>this.connectFound(), skipOffline:()=>this.skipOffline(),
+      forget:()=>this.forget(), goConnect:()=>this.goConnect(), pillClick:()=>this.pillClick(),
+      openSettings:()=>this.openSettings(), closeSettings:()=>this.closeSettings(),
+      doPrint:()=>this.doPrint(), closePrint:()=>this.closePrint(),
+      refMain:this.ref('main'), refMini:this.ref('mini'),
+
+      // connection display
+      connDotStyle, connText, connPillStyle,
+      connHeading:headings[s.conn]||headings.idle, connSub:subs[s.conn]||subs.idle,
+      scanBtnStyle, scanBtnLabel:(s.conn==='scan'?'Scanning…':'Scan for printer'), connectBtnLabel:(s.conn==='pairing'?'Pairing…':'Connect'),
+      foundAddr:s.addr, signalBars,
+      connTitle:(s.conn==='on'?'Connected':'Disconnected'),
+      settingsDetail:(s.conn==='on'?s.addr:'No printer connected'),
+      settingsBattery:(s.conn==='on'?('RSSI '+s.rssi+' dBm · battery OK'):'—'),
+      connCardBg:(s.conn==='on'?'rgba(47,196,106,.07)':'rgba(255,255,255,.02)'),
+      connCardBorder:(s.conn==='on'?'rgba(47,196,106,.25)':'rgba(255,255,255,.07)'),
+      connBtnStyle:'flex:1;padding:9px;border-radius:8px;border:1px solid '+ac.hex+';background:'+this.hexA(ac.hex,.16)+';color:#eaffef;font-size:12px;font-weight:700;cursor:pointer;',
+
+      // print overlay
+      printStageText, printSubText, progressBarStyle,
+      resultIcon, resultIconStyle, resultBig:(res?res.big:''), resultDetail:(res?res.det:''), againBtnStyle, againLabel:(res&&res.ok?'Print again':'Retry'),
+
+      // editor chrome
+      printBtnStyle, printLabel, printIcon:this.makeIcon('printer',15), settingsGlyph:this.makeIcon('settings',16), closeGlyph:this.makeIcon('x',15), checkGlyph:this.makeIcon('check',14,'#2fc46a'), resultText, resultColor, glowStyle,
+      sizeNote:'12 mm tall · ~'+Math.max(8,Math.round((this._lastW||40)*0.127*s.stretch))+' mm printed', tapeName:tape.label,
+      secLabel:'font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#62626a;margin-bottom:10px;',
+      filename:(s.mode==='barcode'?'barcode':'label')+'-'+(s.line1||'untitled').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,16)+'.png',
+      line2Style:(s.twoLines?'':'opacity:.4;pointer-events:none;')+'width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:13px;font-weight:600;',
+      statusBar: s.conn==='on' ? ('● '+s.addr+'  ·  RSSI '+s.rssi+' dBm  ·  battery OK') : '○ not connected  ·  designing offline'
+    };
+  }
+}
+</script>
+</body>
+</html>

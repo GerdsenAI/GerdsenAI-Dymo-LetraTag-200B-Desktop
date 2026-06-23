@@ -1,0 +1,159 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #08080a;
+  color: #f2f2f4;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+  /* Native-feeling chrome: don't let UI text be selected, but keep inputs editable. */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+button,
+textarea {
+  font-family: inherit;
+}
+
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+::placeholder {
+  color: #54545c;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+}
+
+/* Pixel-accurate thermal preview. */
+.gcv {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Frameless window controls. */
+.winctl {
+  transition: background 0.14s, color 0.14s;
+}
+.winctl:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2f2f4;
+}
+.winctl-close:hover {
+  background: #e03e3e;
+  color: #fff;
+}
+
+/* Motion keyframes (the prototype's set; entrance animations re-added on the
+   connect view and settings drawer). */
+@keyframes gPulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+@keyframes gFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+@keyframes gRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes gFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes gRing {
+  0% {
+    transform: scale(0.45);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+@keyframes gFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes gSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes gSlide {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes gPop {
+  from {
+    transform: scale(0.96);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}

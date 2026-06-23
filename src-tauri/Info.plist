@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Shown when macOS prompts for Bluetooth access. The BLE work happens in the
+       bundled sidecar process, which inherits this app bundle's permission. -->
+  <key>NSBluetoothAlwaysUsageDescription</key>
+  <string>Label Studio uses Bluetooth to find and print to your DYMO LetraTag 200B label maker.</string>
+</dict>
+</plist>
