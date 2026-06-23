@@ -90,7 +90,7 @@ export function SettingsDrawer() {
           <div>
             <div style={css(SEC_LABEL)}>About</div>
             <div style={css("font-size:12px;color:#8a8a92;font-weight:500;line-height:1.7;")}>
-              GerdsenAI Label Studio · v0.1
+              GerdsenAI Label Studio · v0.1.1
               <br />
               Open-source desktop client for the DYMO LetraTag 200B.
               <br />

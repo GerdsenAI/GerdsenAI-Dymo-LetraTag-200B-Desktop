@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Label Studio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.gerdsenai.label-studio",
   "build": {
     "beforeDevCommand": "npm run dev",

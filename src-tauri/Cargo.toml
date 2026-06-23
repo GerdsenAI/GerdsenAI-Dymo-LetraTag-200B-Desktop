@@ -1,6 +1,6 @@
 [package]
 name = "label-studio"
-version = "0.1.0"
+version = "0.1.1"
 description = "GerdsenAI Label Studio — design & print labels on a DYMO LetraTag 200B"
 authors = ["GerdsenAI"]
 edition = "2021"

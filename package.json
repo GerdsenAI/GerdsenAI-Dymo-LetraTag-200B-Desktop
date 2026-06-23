@@ -1,7 +1,29 @@
 {
   "name": "label-studio",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "Free, open-source desktop app to design and print labels on the DYMO LetraTag 200B (LT-200B) over Bluetooth from Windows or macOS — no phone app required.",
+  "keywords": [
+    "dymo",
+    "letratag",
+    "letratag-200b",
+    "lt-200b",
+    "dymo-letratag",
+    "label-maker",
+    "label-printer",
+    "thermal-printer",
+    "bluetooth",
+    "barcode",
+    "code-128",
+    "tauri",
+    "label-design"
+  ],
+  "license": "MIT",
+  "homepage": "https://gerdsenai.github.io/GerdsenAI-Dymo-LetraTag-200B-Desktop/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GerdsenAI/GerdsenAI-Dymo-LetraTag-200B-Desktop.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

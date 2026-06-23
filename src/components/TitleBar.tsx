@@ -53,7 +53,7 @@ export function TitleBar() {
       <img src="/gerdsenai-logo.png" alt="GerdsenAI" style={css("width:30px;height:30px;border-radius:8px;display:block;")} />
       <span style={css("font-size:13px;font-weight:700;")}>Label Studio</span>
       <span style={css("font-size:11px;color:#56565e;font-weight:600;padding:2px 7px;border:1px solid rgba(255,255,255,.08);border-radius:20px;")}>
-        v0.1 · MIT
+        v0.1.1 · MIT
       </span>
       <div {...DRAG} style={css("flex:1;display:flex;justify-content:center;")}>
         <span style={css("font-size:12px;color:#62626a;font-weight:600;font-family:ui-monospace,Menlo,monospace;")}>{filename}</span>
