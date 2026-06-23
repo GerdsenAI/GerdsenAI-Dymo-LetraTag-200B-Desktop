@@ -113,14 +113,23 @@ class Sidecar:
         if not address:
             raise ValueError("connect requires an 'address'")
         # Drop any prior connection first.
-        if self._printer is not None and self._printer.is_connected:
+        if self._printer is not None:
             try:
                 await self._printer.disconnect()
             except Exception as exc:  # noqa: BLE001
                 _log("disconnect-before-connect failed:", exc)
         device = self._devices.get(address)
-        printer = Printer(device) if device is not None else Printer.from_address(address)
-        await printer.connect()
+        try:
+            printer = Printer(device) if device is not None else Printer.from_address(address)
+            await printer.connect()
+        except Exception as exc:  # noqa: BLE001
+            # A cached scan handle can go stale (WinRT especially); fall back to a
+            # plain address connection before giving up.
+            if device is None:
+                raise
+            _log(f"connect via cached device failed ({exc!r}); retrying by address")
+            printer = Printer.from_address(address)
+            await printer.connect()
         self._printer = printer
         return {"connected": True, "address": printer.address, "name": "DYMO LetraTag 200B"}
 
@@ -141,12 +150,7 @@ class Sidecar:
             raw = raw.split(",", 1)[1]
         png = base64.b64decode(raw)
         stretch = int(params.get("stretch", 2) or 1)
-        address = params.get("address")
-
-        if self._printer is None or not self._printer.is_connected:
-            if not address:
-                raise RuntimeError("Printer is not connected")
-            await self._connect(address)
+        address = params.get("address") or (self._printer.address if self._printer is not None else None)
 
         self._event("print_stage", stage="rasterizing")
         image = Image.open(BytesIO(png))
@@ -156,8 +160,6 @@ class Sidecar:
         if stretch and stretch != 1:
             canvas = canvas.stretch(stretch)
 
-        self._event("print_stage", stage="sending")
-
         def on_progress(sent: int, total: int) -> None:
             self._event(
                 "print_progress",
@@ -166,8 +168,28 @@ class Sidecar:
                 percent=round(sent * 100 / total) if total else 100,
             )
 
-        result = await self._printer.print(canvas, on_progress=on_progress)
-        return {"code": result.value, "name": result.name}
+        async def attempt() -> Dict[str, Any]:
+            self._event("print_stage", stage="sending")
+            result = await self._printer.print(canvas, on_progress=on_progress)
+            return {"code": result.value, "name": result.name}
+
+        # The LetraTag drops idle BLE links, so a connection from the Connect screen
+        # may be dead by print time (WinRT then reports "Could not get GATT services:
+        # Unreachable"). Try the current link; on ANY failure, reconnect fresh and
+        # retry once — matching the engine's connect-then-print pattern.
+        try:
+            if self._printer is None or not self._printer.is_connected:
+                if not address:
+                    raise RuntimeError("Printer is not connected")
+                await self._connect(address)
+            return await attempt()
+        except Exception as exc:  # noqa: BLE001
+            _log(f"print failed ({exc!r}); reconnecting and retrying")
+            if not address:
+                raise
+            await asyncio.sleep(0.4)
+            await self._connect(address)
+            return await attempt()
 
     async def _dispatch(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
         if method == "ping":
