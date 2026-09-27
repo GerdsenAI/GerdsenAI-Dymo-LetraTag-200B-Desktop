@@ -7,6 +7,10 @@ on:
   push:
     tags: ["v*"]
 
+# GITHUB_TOKEN is read-only by default; uploading release assets needs write.
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
