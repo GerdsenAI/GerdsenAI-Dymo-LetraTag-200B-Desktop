@@ -4,6 +4,19 @@ All notable changes to GerdsenAI Label Studio are documented here. The format is
 on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project follows
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Barcode + text on one label.** A "Big text beside it" field prints text (e.g. a
+  bin or shelf code like `A1`) at full head height left of the barcode, so one strip
+  carries both a human-readable code and a scannable one.
+- **Full-height bars.** The small caption under the bars is now a toggle ("Small
+  text"); with it off, the bars use all 30 dots of the head, which scans much more
+  reliably on 12 mm LT tape.
+- **Bar width.** Thin / Wide / XL prints 1, 2 or 3 dots per Code 128 module, so bars
+  get thicker without stretching any text the way the global Stretch setting does.
+- "Bin label" template showing the new layout.
+
 ## [0.1.1] — 2026-06-23
 
 ### Fixed

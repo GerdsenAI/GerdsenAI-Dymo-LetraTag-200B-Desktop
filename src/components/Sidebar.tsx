@@ -47,12 +47,31 @@ export function Sidebar() {
               </div>
             </div>
           ) : (
-            <input
-              value={state.barcode}
-              onChange={(e) => s.setBarcode(e.target.value)}
-              placeholder="Barcode data"
-              style={css("width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:12px;font-weight:600;font-family:ui-monospace,Menlo,monospace;")}
-            />
+            <div style={css("display:flex;flex-direction:column;gap:8px;")}>
+              <input
+                value={state.barcode}
+                onChange={(e) => s.setBarcode(e.target.value)}
+                placeholder="Barcode data"
+                style={css("width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:12px;font-weight:600;font-family:ui-monospace,Menlo,monospace;")}
+              />
+              <input
+                value={state.barcodeText ?? ""}
+                onChange={(e) => s.setBarcodeText(e.target.value)}
+                placeholder="Big text beside it (e.g. A1)"
+                style={css("width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:#161619;color:#f2f2f4;font-size:13px;font-weight:700;")}
+              />
+              <div style={css("display:flex;gap:7px;align-items:center;")}>
+                <span style={css("font-size:11px;color:#8a8a94;")}>Bars</span>
+                <div style={css("display:flex;gap:4px;padding:3px;background:rgba(255,255,255,.04);border-radius:9px;border:1px solid rgba(255,255,255,.07);")}>
+                  {[1, 2, 3].map((b) => (
+                    <button key={b} onClick={() => s.setBarcodeBar(b)} style={css(seg((state.barcodeBar || 1) === b))}>
+                      {b === 1 ? "Thin" : b === 2 ? "Wide" : "XL"}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={s.toggleBarcodeCaption} style={css(seg(!!state.barcodeCaption) + ";flex:1;")}>Small text</button>
+              </div>
+            </div>
           )}
         </div>
 

@@ -40,6 +40,9 @@ export interface Snapshot {
   tape: TapeId;
   mode: Mode;
   barcode: string;
+  barcodeText: string; // big text printed beside the barcode ("" = none)
+  barcodeCaption: boolean; // small human-readable text under the bars
+  barcodeBar: number; // print dots per bar module (1-3)
   icon: string;
   date: boolean;
   padding: number;
@@ -73,6 +76,9 @@ export interface LabelState {
   tape: TapeId;
   mode: Mode;
   barcode: string;
+  barcodeText: string; // big text printed beside the barcode ("" = none)
+  barcodeCaption: boolean; // small human-readable text under the bars
+  barcodeBar: number; // print dots per bar module (1-3)
   icon: string;
   date: boolean;
   padding: number;

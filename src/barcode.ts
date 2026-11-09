@@ -60,25 +60,75 @@ function encodeModules(input: string): number[] {
   return modules;
 }
 
-/**
- * Renders Code 128-B for `str` to a 1-bit bitmap of height `H`, with the bars in
- * the top ~70% and a human-readable caption beneath (matching the prototype's
- * proportions so the live preview reads naturally).
- */
-export function code128Bitmap(str: string, H: number): Bitmap {
-  const text = (str || " ").toString();
-  const modules = encodeModules(text || " ");
-  const W = Math.max(8, modules.length);
-  const data = new Uint8Array(W * H);
-  const barH = Math.round(H * 0.7);
+export interface BarcodeOptions {
+  /** Small human-readable text under the bars (takes ~30% of the 30-dot head). Off = bars use the full height. */
+  caption?: boolean;
+  /** Print dots per bar module, 1-3. 2 doubles the bar width without stretching any text. */
+  bar?: number;
+  /** Big text printed left of the barcode at full head height, e.g. a bin code "A1". */
+  side?: string;
+}
 
-  for (let x = 0; x < modules.length; x++) {
-    if (modules[x]) {
+/** Thresholds whatever is drawn on `c` into `data` (1 = ink) inside the given box. */
+function inkFrom(c: CanvasRenderingContext2D, data: Uint8Array, W: number, x0: number, x1: number, y0: number, y1: number): void {
+  const d = c.getImageData(0, 0, W, c.canvas.height).data;
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const i = y * W + x;
+      const a = d[i * 4 + 3];
+      const lum = (d[i * 4] + d[i * 4 + 1] + d[i * 4 + 2]) / 3;
+      if (a > 60 && lum < 140) data[i] = 1;
+    }
+  }
+}
+
+/**
+ * Renders Code 128-B for `str` to a 1-bit bitmap of height `H`. With the
+ * caption off, the bars use the whole head height (the LetraTag head is only
+ * 30 dots, so every dot of bar height helps a scanner). Optionally adds the
+ * small caption under the bars, and/or a big text label left of the barcode.
+ */
+export function code128Bitmap(str: string, H: number, opts: BarcodeOptions = {}): Bitmap {
+  const text = (str || " ").toString();
+  const bar = Math.max(1, Math.min(3, Math.round(opts.bar ?? 1)));
+  const modules = encodeModules(text || " ");
+  const side = (opts.side || "").trim().slice(0, 24);
+
+  // Size the side text so its ink fills the head height (bold, condensed), if any.
+  let sideFont = "";
+  let sideW = 0;
+  let sideY = 0;
+  if (side) {
+    const m = document.createElement("canvas").getContext("2d")!;
+    for (let px = 44; px >= 12; px--) {
+      m.font = "700 " + px + "px 'Arial Narrow','Roboto Condensed',system-ui,sans-serif";
+      const t = m.measureText(side);
+      const ink = t.actualBoundingBoxAscent + t.actualBoundingBoxDescent;
+      if (ink <= H - 2 || px === 12) {
+        sideFont = m.font;
+        sideW = Math.ceil(t.width) + 10;
+        sideY = Math.round((H - ink) / 2 + t.actualBoundingBoxAscent); // alphabetic baseline
+        break;
+      }
+    }
+  }
+
+  const barsW = modules.length * bar;
+  const x0 = sideW; // bars start after the side text
+  const W = Math.max(8, sideW + barsW);
+  const data = new Uint8Array(W * H);
+  const barH = opts.caption ? Math.round(H * 0.7) : H;
+
+  for (let m = 0; m < modules.length; m++) {
+    if (!modules[m]) continue;
+    for (let k = 0; k < bar; k++) {
+      const x = x0 + m * bar + k;
       for (let y = 0; y < barH; y++) data[y * W + x] = 1;
     }
   }
 
-  // Human-readable caption, thresholded into the rows below the bars.
+  if (!side && !opts.caption) return { w: W, h: H, data };
+
   const off = document.createElement("canvas");
   off.width = W;
   off.height = H;
@@ -86,18 +136,20 @@ export function code128Bitmap(str: string, H: number): Bitmap {
   c.fillStyle = "#fff";
   c.fillRect(0, 0, W, H);
   c.fillStyle = "#000";
-  c.font = "700 8px 'Arial Narrow',system-ui,sans-serif";
-  c.textAlign = "center";
-  c.textBaseline = "middle";
-  c.fillText(text.slice(0, 42), W / 2, H - 5);
-  const d = c.getImageData(0, 0, W, H).data;
-  for (let y = barH + 1; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i = y * W + x;
-      const a = d[i * 4 + 3];
-      const lum = (d[i * 4] + d[i * 4 + 1] + d[i * 4 + 2]) / 3;
-      if (a > 60 && lum < 140) data[i] = 1;
-    }
+  if (side) {
+    c.font = sideFont;
+    c.textAlign = "left";
+    c.textBaseline = "alphabetic";
+    c.fillText(side, 2, sideY);
   }
+  if (opts.caption) {
+    c.textBaseline = "middle";
+    // Human-readable caption, thresholded into the rows below the bars.
+    c.font = "700 8px 'Arial Narrow',system-ui,sans-serif";
+    c.textAlign = "center";
+    c.fillText(text.slice(0, 42), x0 + barsW / 2, H - 5);
+  }
+  if (side) inkFrom(c, data, W, 0, x0, 0, H);
+  if (opts.caption) inkFrom(c, data, W, x0, W, barH + 1, H);
   return { w: W, h: H, data };
 }

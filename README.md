@@ -58,7 +58,7 @@ on macOS, right-click the app → *Open* (or `xattr -dr com.apple.quarantine "La
   invert, alignment, padding, one or two lines.
 - **Printable glyphs**, "insert today's date", and 8 quick-start templates (name badge, cable label,
   pantry jar, address, and more).
-- **Real, scannable Code 128 barcodes.**
+- **Real, scannable Code 128 barcodes**, optionally with big text beside them, full-height bars and Thin / Wide / XL bar width.
 - **Real Bluetooth** scan, pair, and print — with honest status (printed, battery-low, no-cassette) and
   automatic reconnect.
 - **Premium native window** — frameless, resizable, maximizable, plus a portable Windows build.
@@ -81,7 +81,7 @@ The app finds the printer over Bluetooth and sends the label to the print head.
 Yes — Label Studio is free and open-source (MIT licensed). No subscription, no in-app purchases.
 
 **Can I print barcodes on the LetraTag 200B?**
-Yes. Switch the editor to Barcode mode and type your data to print a real, scannable **Code 128** barcode.
+Yes. Switch the editor to Barcode mode and type your data to print a real, scannable **Code 128** barcode. Add big text beside it (e.g. a bin code), turn the small caption off for full-height bars, and pick Thin, Wide or XL bars.
 
 **Why won't my LetraTag 200B print or connect?**
 Make sure the printer is on, the lid is closed, a cassette is inserted, and all four batteries are
