@@ -26,7 +26,7 @@ function snapshot(s: LabelState): Snapshot {
   return {
     line1: s.line1, line2: s.line2, twoLines: s.twoLines, font: s.font, fontFamily: s.fontFamily,
     bold: s.bold, underline: s.underline, invert: s.invert, align: s.align, tape: s.tape,
-    mode: s.mode, barcode: s.barcode, icon: s.icon, date: s.date, padding: s.padding,
+    mode: s.mode, barcode: s.barcode, barcodeText: s.barcodeText, barcodeCaption: s.barcodeCaption, barcodeBar: s.barcodeBar, icon: s.icon, date: s.date, padding: s.padding,
   };
 }
 
@@ -97,6 +97,9 @@ function initialState(): LabelState {
     tape: "white",
     mode: "text",
     barcode: "GERDSEN-200B",
+    barcodeText: "",
+    barcodeCaption: true,
+    barcodeBar: 1,
     icon: "",
     date: false,
     padding: 1,
@@ -120,6 +123,9 @@ export interface Store {
   setLine1: (v: string) => void;
   setLine2: (v: string) => void;
   setBarcode: (v: string) => void;
+  setBarcodeText: (v: string) => void;
+  toggleBarcodeCaption: () => void;
+  setBarcodeBar: (v: number) => void;
   setPadding: (v: number) => void;
   toggleTwo: () => void;
   setMode: (m: "text" | "barcode") => void;
@@ -179,7 +185,7 @@ export function LabelStudioProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       state.mode, state.line1, state.line2, state.twoLines, state.font, state.fontFamily,
-      state.bold, state.underline, state.align, state.barcode, state.icon, state.date,
+      state.bold, state.underline, state.align, state.barcode, state.barcodeText, state.barcodeCaption, state.barcodeBar, state.icon, state.date,
       state.padding, fontsReady,
     ],
   );
@@ -337,6 +343,9 @@ export function LabelStudioProvider({ children }: { children: ReactNode }) {
     setLine1: (v) => patch({ line1: v, print: null }),
     setLine2: (v) => patch({ line2: v, print: null }),
     setBarcode: (v) => patch({ barcode: v, print: null }),
+    setBarcodeText: (v) => patch({ barcodeText: v, print: null }),
+    toggleBarcodeCaption: () => patch({ barcodeCaption: !stateRef.current.barcodeCaption, print: null }),
+    setBarcodeBar: (v) => patch({ barcodeBar: v, print: null }),
     setPadding: (v) => patch({ padding: v }),
     toggleTwo: () => patch({ twoLines: !stateRef.current.twoLines }),
     setMode: (m) => patch({ mode: m, print: null }),

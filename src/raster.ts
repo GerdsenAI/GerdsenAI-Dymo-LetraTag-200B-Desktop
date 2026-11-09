@@ -38,7 +38,8 @@ function drawLine(
 
 export function buildBitmap(s: LabelState): Bitmap {
   const H = HEAD_PX;
-  if (s.mode === "barcode") return code128Bitmap(s.barcode || "", H);
+  if (s.mode === "barcode")
+    return code128Bitmap(s.barcode || "", H, { caption: s.barcodeCaption ?? true, bar: s.barcodeBar || 1, side: s.barcodeText || "" });
 
   const L = s.twoLines ? [s.line1 || "", s.line2 || ""] : [s.line1 || ""];
   if (s.icon) L[0] = s.icon + " " + L[0];
